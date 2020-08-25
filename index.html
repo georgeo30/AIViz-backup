@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  .countries {
+    fill: white;
+    stroke: black;
+  }
+
+  .countries :hover {
+    fill: #8a8a8a;
+  }
+
+  .airport:hover .airport-arc {
+    stroke: #f00;
+  }
+
+  .airport-cell {
+    fill: none;
+    stroke: #000;
+    stroke-opacity: 0.1;
+    pointer-events: all;
+  }
+</style>
+
+<body>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="https://d3js.org/topojson.v1.min.js"></script>
+  <script>
+
+    var width = 960,
+      height = 800;
+    var projection = d3.geoMercator()
+      .translate([width / 2, height / 2])
+      .scale(1000);
+
+    var path = d3.geo.path()
+      .projection(null)
+      .pointRadius(10);
+
+
+    var pathTwo = d3.geoPath()
+      .projection(projection)
+      .pointRadius(10);
+
+    var svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+
+    d3.queue()
+      .defer(d3.json, "http://192.168.0.28:8080/africa.json")
+      .defer(d3.csv, "http://192.168.0.28:8080/ixps.csv", typeIxp)
+      .defer(d3.csv, "http://192.168.0.28:8080/links.csv")
+      .await(ready);
+
+    function ready(error, africa, ixps, links) {
+      if (error) throw error;
+      console.log(ixps)
+      var ixpsbyid = d3.map(ixps, function (d) { return d.id; });
+      // links.forEach(function (link) {
+      //   var source = ixpsbyid.get(link.origin),
+      //     target = ixpsbyid.get(link.destination);
+      //     console.log(source)
+
+      //   source.arcs.coordinates.push([source, target]);
+      //   target.arcs.coordinates.push([target, source]);
+      // });
+
+
+      // ixps = ixps
+      //   .filter(function (d) { return true; });
+
+
+      svg.selectAll("path")
+        .data(topojson.feature(africa, africa.objects.countries).features)
+        .attr("class", "countries")
+        .enter().append("path")
+        .attr("class", "countries")
+        .attr("d", path);
+
+      svg.append("path")
+        .datum({ type: "MultiPoint", coordinates: ixps })
+        .attr("class", "airport-dots")
+        .attr("fill", "green")
+        .attr("d", pathTwo);
+
+      // var ixp = svg.selectAll(".airport")
+      //   .data(ixps)
+      //   .enter().append("g")
+      //   .attr("class", "airport");
+
+      // ixp.append("title")
+      //   .text(function (d) { return d.id + "\n"; });
+
+      // ixp.append("path")
+      //   .attr("class", "airport-arc")
+      //   .attr("d", function (d) { return path(d.arcs); });
+
+
+    };
+    function typeIxp(d) {
+      d[0] = +d.longitude;
+      d[1] = +d.latitude;
+      d.arcs = { type: "MultiLineString", coordinates: [] };
+
+      return d;
+    }
+    d3.select(self.frameElement).style("height", height + "px");
+
+  </script>
