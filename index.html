@@ -2,20 +2,18 @@
 <meta charset="utf-8">
 <style>
   .countries {
-    fill: #222;
+    fill: black;
     stroke: #fff;
   }
 
-  .countries :hover {
-    fill: #8a8a8a;
+  .countries:hover {
+    fill: lightcoral;
   }
 
   .customer {
     stroke: green;
     fill: none;
   }
-
-
   .peer {
     stroke: red;
     fill: none;
@@ -26,18 +24,18 @@
     fill: none;
   }
 
-  .airport:hover .airport-arc {
+  .asn-container:hover{
     stroke: blue;
   }
 
-  .airport-cell {
+  /* .airport-cell {
     fill: none;
     stroke: #000;
     stroke-opacity: 0.1;
     pointer-events: all;
-  }
+  } */
 
-  .airport-dots {
+  .ixp-dots  {
     fill: lightblue;
 
   }
@@ -87,11 +85,19 @@
       .defer(d3.csv, "links.csv")
       .await(ready);
 
+    //Load data: Alternative
+    // d3.queue()
+    //   .defer(d3.json, "http://192.168.0.18:8080/topoAfrica.json")
+    //   .defer(d3.csv, "http://192.168.0.18:8080/ixps.csv", typeIxp)
+    //   .defer(d3.csv, "http://192.168.0.18:8080/links.csv")
+    //   .await(ready);
+
+
     //Callback after data is loaded
     function ready(error, africa, ixps, asns, links) {
 
       if (error) throw error;
-      //set id fields as the key for the ixp and asn datasets
+      //Set id fields as the key for the ixp and asn datasets
       var ixpsbyid = d3.map(ixps, function (d) { return d.id; });
       var asnsbyid = d3.map(asns, function (d) { return d.id; });
 
@@ -126,21 +132,22 @@
       //Draw ixps
       svg.append("path")
         .datum({ type: "MultiPoint", coordinates: ixps })
-        .attr("class", "airport-dots")
+        .attr("class", "ixp-dots ")
         .attr("d", path);
 
-      //Draw ans
+      //Draw asns
       svg.append("path")
         .datum({ type: "MultiPoint", coordinates: asns })
         .attr("class", "asn-dots")
         .attr("d", pathTwo);
+      
       //Create asn group that will contain the asn links
-      var ixp = svg.selectAll(".airport")
+      var ixp = svg.selectAll(".asn-container")
         .data(asns)
         .enter().append("g")
-        .attr("class", "airport");
+        .attr("class", "asn-container");
         
-      //Add the asn links to each of the groups
+      //Add the asn relationships to each of the asn
       ixp.append("path")
         .attr("class", "customer")
         .attr("d", function (d) { return pathTwo(d.customer_peer); });
@@ -152,6 +159,7 @@
       ixp.append("path")
         .attr("class", "sibling")
         .attr("d", function (d) { return pathTwo(d.sibling_sibling); });
+      //End for adding asn relationships
 
 
     };
@@ -163,9 +171,11 @@
       return d;
     }
     function typeAsn(d) {
+
       d[0] = +d.longitude;
       d[1] = +d.latitude;
 
+      //Add relationship arrays to each asn
       d.customer_peer = { type: "MultiLineString", coordinates: [] };
 
       d.peer_peer = { type: "MultiLineString", coordinates: [] };
