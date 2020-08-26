@@ -2,16 +2,32 @@
 <meta charset="utf-8">
 <style>
   .countries {
-    fill: white;
-    stroke: black;
+    fill: #222;
+    stroke: #fff;
   }
 
   .countries :hover {
     fill: #8a8a8a;
   }
 
+  .customer {
+    stroke: green;
+    fill: none;
+  }
+
+
+  .peer {
+    stroke: red;
+    fill: none;
+  }
+
+  .sibling {
+    stroke: turquoise;
+    fill: none;
+  }
+
   .airport:hover .airport-arc {
-    stroke: #f00;
+    stroke: blue;
   }
 
   .airport-cell {
@@ -20,82 +36,122 @@
     stroke-opacity: 0.1;
     pointer-events: all;
   }
+
+  .airport-dots {
+    fill: lightblue;
+
+  }
+
+  .asn-dots {
+    fill: yellow;
+
+  }
 </style>
 
 <body>
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <script src="https://d3js.org/topojson.v1.min.js"></script>
   <script>
 
-    var width = 960,
-      height = 800;
+    //Canvas settings
+    var width = 960, height = 800;
+
+    //Projection type
     var projection = d3.geoMercator()
       .translate([width / 2, height / 2])
       .scale(400);
 
+    //IXP projection
+    var path = d3.geoPath()
+      .projection(projection)
+      .pointRadius(8);
 
-
-
+    //ASN projection
     var pathTwo = d3.geoPath()
       .projection(projection)
       .pointRadius(5);
 
+    //Add canvas with settings
     var svg = d3.select("body").append("svg")
       .attr("width", width)
       .attr("height", height);
 
-
+    //Load data
     d3.queue()
-      .defer(d3.json, "http://192.168.0.18:8080/topoAfrica.json")
-      .defer(d3.csv, "http://192.168.0.18:8080/ixps.csv", typeIxp)
-      .defer(d3.csv, "http://192.168.0.18:8080/links.csv")
+      .defer(d3.json, "topoAfrica.json")
+      .defer(d3.csv, "ixps.csv", typeIxp)
+      .defer(d3.csv, "asns.csv", typeAsn)
+      .defer(d3.csv, "links.csv")
       .await(ready);
 
-    function ready(error, africa, ixps, links) {
+    //Callback after data is loaded
+    function ready(error, africa, ixps, asns, links) {
+
       if (error) throw error;
-      console.log(ixps)
+      //set id fields as the key for the ixp and asn datasets
       var ixpsbyid = d3.map(ixps, function (d) { return d.id; });
-      // links.forEach(function (link) {
-      //   var source = ixpsbyid.get(link.origin),
-      //     target = ixpsbyid.get(link.destination);
-      //     console.log(source)
+      var asnsbyid = d3.map(asns, function (d) { return d.id; });
 
-      //   source.arcs.coordinates.push([source, target]);
-      //   target.arcs.coordinates.push([target, source]);
-      // });
+      //add each link to an asn
+      links.forEach(function (link) {
+        //get source/target asns from an id field 
+        var source = asnsbyid.get(link.origin)
+        var target = asnsbyid.get(link.destination);
+        //add link type to asn
+        if (link.type == "c2p") {
+          source.customer_peer.coordinates.push([source, target]);
+          target.customer_peer.coordinates.push([target, source]);
+        }
+        else if (link.type == "p2p") {
+          source.peer_peer.coordinates.push([source, target]);
+          target.peer_peer.coordinates.push([target, source]);
+        }
+        else {
+          source.sibling_sibling.coordinates.push([source, target]);
+          target.sibling_sibling.coordinates.push([target, source]);
+        }
+      });
 
-
-      // ixps = ixps
-      //   .filter(function (d) { return true; });
-
-
+      //Draw countries
       svg.selectAll("path")
         .data(topojson.feature(africa, africa.objects.customAfrica).features)
         .attr("class", "countries")
         .enter().append("path")
         .attr("class", "countries")
-        .attr("d", pathTwo);
+        .attr("d", path);
 
+      //Draw ixps
       svg.append("path")
         .datum({ type: "MultiPoint", coordinates: ixps })
         .attr("class", "airport-dots")
-        .attr("fill", "green")
+        .attr("d", path);
+
+      //Draw ans
+      svg.append("path")
+        .datum({ type: "MultiPoint", coordinates: asns })
+        .attr("class", "asn-dots")
         .attr("d", pathTwo);
+      //Create asn group that will contain the asn links
+      var ixp = svg.selectAll(".airport")
+        .data(asns)
+        .enter().append("g")
+        .attr("class", "airport");
+        
+      //Add the asn links to each of the groups
+      ixp.append("path")
+        .attr("class", "customer")
+        .attr("d", function (d) { return pathTwo(d.customer_peer); });
 
-      // var ixp = svg.selectAll(".airport")
-      //   .data(ixps)
-      //   .enter().append("g")
-      //   .attr("class", "airport");
+      ixp.append("path")
+        .attr("class", "peer")
+        .attr("d", function (d) { return pathTwo(d.peer_peer); });
 
-      // ixp.append("title")
-      //   .text(function (d) { return d.id + "\n"; });
-
-      // ixp.append("path")
-      //   .attr("class", "airport-arc")
-      //   .attr("d", function (d) { return path(d.arcs); });
+      ixp.append("path")
+        .attr("class", "sibling")
+        .attr("d", function (d) { return pathTwo(d.sibling_sibling); });
 
 
     };
@@ -103,6 +159,20 @@
       d[0] = +d.longitude;
       d[1] = +d.latitude;
       d.arcs = { type: "MultiLineString", coordinates: [] };
+
+      return d;
+    }
+    function typeAsn(d) {
+      d[0] = +d.longitude;
+      d[1] = +d.latitude;
+
+      d.customer_peer = { type: "MultiLineString", coordinates: [] };
+
+      d.peer_peer = { type: "MultiLineString", coordinates: [] };
+
+      d.sibling_sibling = { type: "MultiLineString", coordinates: [] };
+
+
 
       return d;
     }
