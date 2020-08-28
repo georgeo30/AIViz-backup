@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
 <style>
   .countries {
     fill: black;
@@ -7,14 +9,25 @@
   }
 
   .countries:hover {
-    fill: lightcoral;
+    fill: #cccccc;
   }
 
   .customer {
     stroke: green;
     fill: none;
   }
+
+  .same-customer {
+    stroke: green;
+    fill: none;
+  }
+
   .peer {
+    stroke: red;
+    fill: none;
+  }
+
+  .same-peer {
     stroke: red;
     fill: none;
   }
@@ -24,7 +37,12 @@
     fill: none;
   }
 
-  .asn-container:hover{
+  .same-sibling {
+    stroke: turquoise;
+    fill: none;
+  }
+
+  .asn-container:hover {
     stroke: blue;
   }
 
@@ -35,157 +53,376 @@
     pointer-events: all;
   } */
 
-  .ixp-dots  {
-    fill: lightblue;
+  .ixp-dots {
+    fill: rgba(169, 103, 201, 0.7);
 
   }
 
   .asn-dots {
-    fill: yellow;
+    fill: rgb(255, 255, 0, 0.7);
 
   }
 </style>
 
-<body>
+<body style="background-color: 	#cae7f9;">
+  <div class="w3-sidebar w3-bar-block w3-dark-grey w3-animate-left" style="display:none; background-color: white;"
+    id="mySidebar">
+    <div style="background-color: black; color:white;">
+      <button class="w3-button w3-xlarge w3-hover-black w3-bar-item" onclick=" w3_close()">&times;
+        <h3 style=" display: inline-block; ">Africa Internet Visualizer</h3></button>
+    </div>
+    <a href="#" class="w3-bar-item w3-button item">
+      <div> <input type="checkbox" id="cbborder" name="vehicle1" checked="checked"> <label
+          for="vehicle1">Borders</label><br>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
-  <script src="https://d3js.org/d3.v4.min.js"></script>
-  <script src="https://d3js.org/topojson.v1.min.js"></script>
-  <script>
+        </label></input>
+      </div>
+    </a>
+    <a href="#" class="w3-bar-item w3-button item">
+      <div> <input type="checkbox" id="allixpsandasns" onclick="allixpsandasnscb()" onche checked="checked"> <label>All
+          Show all
+          </label><br>
 
-    //Canvas settings
-    var width = 960, height = 800;
+        </label></input>
+      </div>
 
-    //Projection type
-    var projection = d3.geoMercator()
-      .translate([width / 2, height / 2])
-      .scale(400);
-
-    //IXP projection
-    var path = d3.geoPath()
-      .projection(projection)
-      .pointRadius(8);
-
-    //ASN projection
-    var pathTwo = d3.geoPath()
-      .projection(projection)
-      .pointRadius(5);
-
-    //Add canvas with settings
-    var svg = d3.select("body").append("svg")
-      .attr("width", width)
-      .attr("height", height);
-
-    //Load data
-    d3.queue()
-      .defer(d3.json, "topoAfrica.json")
-      .defer(d3.csv, "ixps.csv", typeIxp)
-      .defer(d3.csv, "asns.csv", typeAsn)
-      .defer(d3.csv, "links.csv")
-      .await(ready);
-
-    //Load data: Alternative
-    // d3.queue()
-    //   .defer(d3.json, "http://192.168.0.18:8080/topoAfrica.json")
-    //   .defer(d3.csv, "http://192.168.0.18:8080/ixps.csv", typeIxp)
-    //   .defer(d3.csv, "http://192.168.0.18:8080/links.csv")
-    //   .await(ready);
+    </a>
 
 
-    //Callback after data is loaded
-    function ready(error, africa, ixps, asns, links) {
 
-      if (error) throw error;
-      //Set id fields as the key for the ixp and asn datasets
-      var ixpsbyid = d3.map(ixps, function (d) { return d.id; });
-      var asnsbyid = d3.map(asns, function (d) { return d.id; });
+    <!-- <a href="#" class="w3-bar-item w3-button">Link 2</a>
+    <a href="#" class="w3-bar-item w3-button">Link 3</a> -->
+  </div>
+  <div style="background-color: black;">
+    <button id="openNav" class="w3-button w3-xlarge w3-hover-black w3-bar-item"
+      style="background-color: black; color: white;" onclick="w3_open()">&#9776; <h2 style=" display: inline-block;">
+        Africa Internet Visualizer</h1>
+    </button>
 
-      //add each link to an asn
-      links.forEach(function (link) {
-        //get source/target asns from an id field 
-        var source = asnsbyid.get(link.origin)
-        var target = asnsbyid.get(link.destination);
-        //add link type to asn
-        if (link.type == "c2p") {
-          source.customer_peer.coordinates.push([source, target]);
-          target.customer_peer.coordinates.push([target, source]);
-        }
-        else if (link.type == "p2p") {
-          source.peer_peer.coordinates.push([source, target]);
-          target.peer_peer.coordinates.push([target, source]);
+  </div>
+  <div id="main">
+
+    <script>
+      function w3_open() {
+        document.getElementById("main").style.marginLeft = "25%";
+        document.getElementById("mySidebar").style.width = "25%";
+        document.getElementById("mySidebar").style.display = "block";
+        document.getElementById("openNav").style.display = 'none';
+      }
+      function w3_close() {
+        document.getElementById("main").style.marginLeft = "0%";
+        document.getElementById("mySidebar").style.display = "none";
+        document.getElementById("openNav").style.display = "inline-block";
+      }
+      document.getElementById("cbborder").onclick = function () {
+        if (this.checked) {
+          var cols = document.getElementsByClassName('countries');
+          for (i = 0; i < cols.length; i++) {
+            cols[i].style.stroke = 'white';
+
+          }
+
+
         }
         else {
-          source.sibling_sibling.coordinates.push([source, target]);
-          target.sibling_sibling.coordinates.push([target, source]);
+          var cols = document.getElementsByClassName('countries');
+          for (i = 0; i < cols.length; i++) {
+            cols[i].style.stroke = 'black';
+
+          }
+
         }
-      });
+      };
+    </script>
 
-      //Draw countries
-      svg.selectAll("path")
-        .data(topojson.feature(africa, africa.objects.customAfrica).features)
-        .attr("class", "countries")
-        .enter().append("path")
-        .attr("class", "countries")
-        .attr("d", path);
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script>
 
-      //Draw ixps
-      svg.append("path")
-        .datum({ type: "MultiPoint", coordinates: ixps })
-        .attr("class", "ixp-dots ")
-        .attr("d", path);
+      //Canvas settings
+      var width = 1200, height = 800;
 
-      //Draw asns
-      svg.append("path")
-        .datum({ type: "MultiPoint", coordinates: asns })
-        .attr("class", "asn-dots")
-        .attr("d", pathTwo);
-      
-      //Create asn group that will contain the asn links
-      var ixp = svg.selectAll(".asn-container")
-        .data(asns)
-        .enter().append("g")
-        .attr("class", "asn-container");
-        
-      //Add the asn relationships to each of the asn
-      ixp.append("path")
-        .attr("class", "customer")
-        .attr("d", function (d) { return pathTwo(d.customer_peer); });
+      //Projection type
+      var projection = d3.geoMercator()
+        .translate([width / 2, height / 2])
+        .scale(500);
 
-      ixp.append("path")
-        .attr("class", "peer")
-        .attr("d", function (d) { return pathTwo(d.peer_peer); });
+      //IXP projection
+      var path = d3.geoPath()
+        .projection(projection)
+        .pointRadius(8);
 
-      ixp.append("path")
-        .attr("class", "sibling")
-        .attr("d", function (d) { return pathTwo(d.sibling_sibling); });
-      //End for adding asn relationships
+      //ASN projection
+      var pathTwo = d3.geoPath()
+        .projection(projection)
+        .pointRadius(5);
+
+      //Add canvas with settings
+      var svg = d3.select("#main").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      //Load data
+      d3.queue()
+        .defer(d3.json, "topoAfrica.json")
+        .defer(d3.csv, "ixps.csv", typeIxp)
+        .defer(d3.csv, "asns.csv", typeAsn)
+        .defer(d3.csv, "links.csv")
+        .await(ready);
+
+      //Load data: Alternative
+      // d3.queue()
+      //   .defer(d3.json, "http://192.168.0.18:8080/topoAfrica.json")
+      //   .defer(d3.csv, "http://192.168.0.18:8080/ixps.csv", typeIxp)
+      //   .defer(d3.csv, "http://192.168.0.18:8080/links.csv")
+      //   .await(ready);
 
 
-    };
-    function typeIxp(d) {
-      d[0] = +d.longitude;
-      d[1] = +d.latitude;
-      d.arcs = { type: "MultiLineString", coordinates: [] };
+      //Callback after data is loaded
+      function ready(error, africa, ixps, asns, links) {
 
-      return d;
-    }
-    function typeAsn(d) {
-
-      d[0] = +d.longitude;
-      d[1] = +d.latitude;
-
-      //Add relationship arrays to each asn
-      d.customer_peer = { type: "MultiLineString", coordinates: [] };
-
-      d.peer_peer = { type: "MultiLineString", coordinates: [] };
-
-      d.sibling_sibling = { type: "MultiLineString", coordinates: [] };
+        if (error) throw error;
+        //Set id fields as the key for the ixp and asn datasets
+        var ixpsbyid = d3.map(ixps, function (d) { return d.id; });
+        var asnsbyid = d3.map(asns, function (d) { return d.id; });
 
 
 
-      return d;
-    }
-    d3.select(self.frameElement).style("height", height + "px");
+        //add each link to an asn
+        links.forEach(function (link) {
+          //get source/target asns from an id field 
+          var source = asnsbyid.get(link.origin)
+          var target = asnsbyid.get(link.destination);
+          //add link type to asn
+          if (link.type == "c2p") {
+            if (source.country != target.country) {
+              source.customer_peer.coordinates.push([source, target]);
+              target.customer_peer.coordinates.push([target, source]);
+            }
+            else {
+              source.same_customer_peer.coordinates.push([source, target]);
+              target.same_customer_peer.coordinates.push([target, source]);
+            }
+          }
 
-  </script>
+          else if (link.type == "p2p") {
+            if (source.country != target.country) {
+              source.peer_peer.coordinates.push([source, target]);
+              target.peer_peer.coordinates.push([target, source]);
+            }
+            else {
+              source.same_peer_peer.coordinates.push([source, target]);
+              target.same_peer_peer.coordinates.push([target, source]);
+            }
+          }
+          else {
+            if (source.country != target.country) {
+              source.sibling_sibling.coordinates.push([source, target]);
+              target.sibling_sibling.coordinates.push([target, source]);
+            }
+            else {
+              source.same_sibling_sibling.coordinates.push([source, target]);
+              target.same_sibling_sibling.coordinates.push([target, source]);
+            }
+          }
+        });
+
+        var features = topojson.feature(africa, africa.objects.customAfrica).features
+
+        console.log(features[0]);
+
+        //Draw countries
+        svg.selectAll("path")
+          .data(features)
+          .attr("class", "country")
+          .enter().append("path")
+          .attr("class", "countries")
+          .attr("d", path)
+          .on("click", clickCountry);
+
+
+        // Draw ixps
+        // svg.append("path")
+        //   .datum({ type: "MultiPoint", coordinates: ixps })
+        //   .attr("class", "ixp-dots ")
+        //   .attr("d", path);
+
+        svg.selectAll("ixp-dots")
+          .data(ixps)
+          .enter()
+          .append("circle")
+          .attr("class", function (d) { return `${d.country} ixp-dots` })
+          .attr("cx", function (d) { return projection([d.longitude, d.latitude])[0] })
+          .attr("cy", function (d) { return projection([d.longitude, d.latitude])[1] })
+          .style("fill", "rgba(169, 103, 201, 0.7)")
+          .attr("r", 8);
+
+        svg.selectAll("asn-dots")
+          .data(asns)
+          .enter()
+          .append("circle")
+          .attr("class", function (d) { return `${d.country} asn-dots` })
+          .attr("cx", function (d) { return projection([d.longitude, d.latitude])[0] })
+          .attr("cy", function (d) { return projection([d.longitude, d.latitude])[1] })
+          .style("fill", "rgb(255,255,0,0.7)")
+          .attr("r", 4);
+
+        //Draw asns
+        // svg.append("path")
+        //   .datum({ type: "MultiPoint", coordinates: asns })
+        //   .attr("class", "asn-dots")
+        //   .attr("d", pathTwo);
+
+        //Create asn group that will contain the asn links
+        var ixp = svg.selectAll(".asn-container")
+          .data(asns)
+          .enter().append("g")
+          .attr("class", function (d) { return `${d.country} asn-container` });
+
+
+        //Add the asn relationships to each of the asn
+
+        //customer-peer
+        ixp.append("path")
+          .attr("class", "customer")
+          .attr("d", function (d) { return pathTwo(d.customer_peer); });
+
+        ixp.append("path")
+          .attr("class", "same-customer")
+          .attr("d", function (d) { return pathTwo(d.same_customer_peer); });
+        //peeer_peer
+        ixp.append("path")
+          .attr("class", "peer")
+          .attr("d", function (d) { return pathTwo(d.peer_peer); });
+
+        ixp.append("path")
+          .attr("class", "same-peer")
+          .attr("d", function (d) { return pathTwo(d.same_peer_peer); });
+
+        //sibling_sibling
+        ixp.append("path")
+          .attr("class", "sibling")
+          .attr("d", function (d) { return pathTwo(d.sibling_sibling); });
+
+        ixp.append("path")
+          .attr("class", "same-sibling")
+          .attr("d", function (d) { return pathTwo(d.same_sibling_sibling); });
+        //End for adding asn relationships
+
+
+      }; //end of reading files
+
+      // All IXPs and ASNs checkbox
+      function allixpsandasnscb() {
+        var allixpsandasns = document.getElementById("allixpsandasns");
+
+        if (allixpsandasns.checked == true) {
+          drawEverything();
+          console.log("executing everything");
+
+
+        } else {
+          removeEverything();
+        }
+      }
+
+      function rmcolormap() {
+        svg.selectAll("circle.ixp-dots").style("fill", "none");
+        svg.selectAll("circle.asn-dots").style("fill", "none");
+        svg.selectAll("customer").style("stroke", "none")
+        svg.selectAll("peer").style("stroke", "none")
+        svg.selectAll("sibling").style("stroke", "none")
+
+      }
+      //Method to color the map (plot all ixps and asns)
+      function colormap() {
+        svg.selectAll("circle.ixp-dots").style("fill", "rgba(169, 103, 201, 0.7)");
+        svg.selectAll("circle.asn-dots").style("fill", "rgb(255,255,0,0.7)");
+        svg.selectAll("customer").style("stroke", "green");
+        svg.selectAll("peer").style("stroke", "red");
+        svg.selectAll("sibling").style("stroke", "turquoise");
+
+      }
+
+      function clickCountry(d, i) {
+
+        var country = d.properties.name;
+
+        drawEverything();
+        hiddenOrVisible("hidden", country);
+      }
+
+      function hiddenOrVisible(option, country) {
+
+        svg.selectAll("circle.ixp-dots").filter(function (value, index) { return value.country != country }).style("visibility", option);
+
+        svg.selectAll("circle.asn-dots").filter(function (value, index) { return value.country != country }).style("visibility", option);
+
+        svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", option);
+        svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", option);
+        svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility",option);        
+
+        svg.selectAll("g.asn-container").filter(function (value, index) { return value.country != country }).style("visibility", option);
+      }
+
+      function drawEverything() {
+
+        svg.selectAll("circle.ixp-dots").style("visibility", "visible");
+        svg.selectAll("circle.asn-dots").style("visibility", "visible");
+
+        svg.selectAll("customer").style("visibility", "visible");
+        svg.selectAll("peer").style("visibility", "visible");
+        svg.selectAll("sibling").style("visibility", "visible");
+
+        svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", "visible");
+        svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", "visible");
+        svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility","visible");
+
+        svg.selectAll("g.asn-container").style("visibility","visible");
+      }
+
+      function removeEverything(){
+        svg.selectAll("circle.ixp-dots").style("visibility", "hidden");
+        svg.selectAll("circle.asn-dots").style("visibility", "hidden");
+        svg.selectAll("customer").style("visibility", "hidden");
+        svg.selectAll("peer").style("visibility", "hidden");
+        svg.selectAll("sibling").style("visibility", "hidden");
+        svg.selectAll("g.asn-container").style("visibility","hidden");
+      }
+
+
+
+
+
+
+      function typeIxp(d) {
+        d[0] = +d.longitude;
+        d[1] = +d.latitude;
+        d.arcs = { type: "MultiLineString", coordinates: [] };
+
+        return d;
+      }
+      function typeAsn(d) {
+
+        d[0] = +d.longitude;
+        d[1] = +d.latitude;
+
+        //Add relationship arrays to each asn
+        d.customer_peer = { type: "MultiLineString", coordinates: [] };
+        d.same_customer_peer = { type: "MultiLineString", coordinates: [] };
+
+        d.peer_peer = { type: "MultiLineString", coordinates: [] };
+        d.same_peer_peer = { type: "MultiLineString", coordinates: [] };
+
+        d.sibling_sibling = { type: "MultiLineString", coordinates: [] };
+        d.same_sibling_sibling = { type: "MultiLineString", coordinates: [] };
+
+
+
+        return d;
+      }
+      d3.select(self.frameElement).style("height", height + "px");
+
+    </script>
