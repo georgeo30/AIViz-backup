@@ -372,23 +372,31 @@
         svg.selectAll("circle.ixp-dots").style("visibility", "visible");
         svg.selectAll("circle.asn-dots").style("visibility", "visible");
 
-        svg.selectAll("customer").style("visibility", "visible");
-        svg.selectAll("peer").style("visibility", "visible");
-        svg.selectAll("sibling").style("visibility", "visible");
+        // svg.selectAll("customer").style("visibility", "visible");
+        // svg.selectAll("peer").style("visibility", "visible");
+        // svg.selectAll("sibling").style("visibility", "visible");
 
-        svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", "visible");
-        svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", "visible");
-        svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility","visible");
+        // svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", "visible");
+        // svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", "visible");
+        // svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility","visible");
 
         svg.selectAll("g.asn-container").style("visibility","visible");
       }
 
       function removeEverything(){
+
         svg.selectAll("circle.ixp-dots").style("visibility", "hidden");
         svg.selectAll("circle.asn-dots").style("visibility", "hidden");
-        svg.selectAll("customer").style("visibility", "hidden");
-        svg.selectAll("peer").style("visibility", "hidden");
-        svg.selectAll("sibling").style("visibility", "hidden");
+
+        // svg.selectAll("customer").style("visibility", "hidden");
+        // svg.selectAll("peer").style("visibility", "hidden");
+        // svg.selectAll("sibling").style("visibility", "hidden");
+
+        // svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", "hidden");
+        // svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", "hidden");
+        // svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility","hidden");
+
+
         svg.selectAll("g.asn-container").style("visibility","hidden");
       }
 
