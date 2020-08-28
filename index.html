@@ -5,12 +5,12 @@
 
 <!--Styling of elements on map-->
 <style>
-  .countries {
+  .country/*countries*/ {
     fill: black;
     stroke: #fff;
   }
 
-  .countries:hover {
+  /*.countries*/.country:hover {
     fill: #cccccc;
   }
 
@@ -55,7 +55,7 @@
     pointer-events: all;
   } */
 
-  .ixp-dots {
+  .IXP/*ixp-dots*/ {
     fill: rgba(169, 103, 201, 0.7);
 
   }
@@ -118,7 +118,7 @@
       }
       document.getElementById("cbborder").onclick = function () {
         if (this.checked) {
-          var cols = document.getElementsByClassName('countries');
+          var cols = document.getElementsByClassName(/*'countries'*/'country');
           console.log(cols)
           for (i = 0; i < cols.length; i++) {
             cols[i].style.stroke = 'white';
@@ -128,7 +128,7 @@
 
         }
         else {
-          var cols = document.getElementsByClassName('countries');
+          var cols = document.getElementsByClassName(/*'countries'*/'country');
           for (i = 0; i < cols.length; i++) {
             cols[i].style.stroke = 'black';
 
@@ -236,7 +236,7 @@
         var features = topojson.feature(africa, africa.objects.customAfrica).features;
 
         //Draw countries
-        //EDIT FIX BORDER
+
         svg.selectAll(".country") //now selecting all svg elements by class country...ask if this should be null or g, changed from path, as we dont want to append countries to something else? or does it replace?
           .data(features)
           /*.attr("class", "country")*/  //ask about this line... no class being added to anything? or is it because of ln 239?
@@ -244,6 +244,7 @@
           .attr("class","country")
           .attr("id",function(d){return d.properties.name})
           .append("path")
+          /*.attr("id",function(d){return d.properties.name})*/
           .attr("class", "border")
           .attr("d", path)
           .on("click", clickCountry);
@@ -254,21 +255,58 @@
         //   .datum({ type: "MultiPoint", coordinates: ixps })
         //   .attr("class", "ixp-dots ")
         //   .attr("d", path);
-        console.log(svg.select(".country"))
+        //console.log(svg.select(".country"))
 
         /*Now we need to select all the countries, and add the IXPs to each country yes?*/
-        //svg.selectAll(".country").enter().data(ixps).filter(function(d){return d.country==this.id})
+        //add IXPs
+        svg.selectAll(".country")
+        .each(
+          function(d,i){
+            var ixpGroup = d3.select(this);
+            ixpGroup.selectAll("circle")
+            .data(ixps.filter(function(d){return d.country==ixpGroup.attr("id")}))
+            .enter()
+            .append("circle")
+            .attr("class","IXP")
+            .attr("id",function(d){return d.id})
+            .attr("cx", function (d) { return projection([d.longitude, d.latitude])[0] })
+            .attr("cy", function (d) { return projection([d.longitude, d.latitude])[1] })
+            .style("fill", "rgba(169, 103, 201, 0.7)")
+            .attr("r", 8);
+            });
+
+        
+        /* HOW TO FILTER A SELECTION
+        svg.selectAll(".country").filter(function(d,i){
+          return d3.select(this).attr("id")=="Algeria";
+        }).append("circle").attr("cx", 1).attr("cy", 1);
+        */
+
+        /*
+        HOW TO ADD AN ELEMENT TO EACH THING IN A SELECTION
+        svg.selectAll(".country").each(function(d,i){
+          d3.select(this).append("circle").attr("cx", 1).attr("cy", 1);
+        });
+        */
+
+        
 
 
-        svg.selectAll("ixp-dots")
-          .data(ixps)
-          .enter()
-          .append("circle")
-          .attr("class", function (d) { return `${d.country} ixp-dots` })
-          .attr("cx", function (d) { return projection([d.longitude, d.latitude])[0] })
-          .attr("cy", function (d) { return projection([d.longitude, d.latitude])[1] })
-          .style("fill", "rgba(169, 103, 201, 0.7)")
-          .attr("r", 8);
+
+        
+        
+
+
+
+        // svg.selectAll("ixp-dots")
+        //   .data(ixps)
+        //   .enter()
+        //   .append("circle")
+        //   .attr("class", function (d) { return `${d.country} ixp-dots` })
+        //   .attr("cx", function (d) { return projection([d.longitude, d.latitude])[0] })
+        //   .attr("cy", function (d) { return projection([d.longitude, d.latitude])[1] })
+        //   .style("fill", "rgba(169, 103, 201, 0.7)")
+        //   .attr("r", 8);
 
         svg.selectAll("asn-dots")
           .data(asns)
@@ -323,6 +361,8 @@
         //End for adding asn relationships
 
 
+
+        raiseUp();
       }; //end of reading files
 
       // All IXPs and ASNs checkbox
@@ -331,30 +371,39 @@
 
         if (allixpsandasns.checked == true) {
           drawEverything();
+          
           console.log("executing everything");
 
 
         } else {
           removeEverything();
         }
+        raiseUp();
       }
 
       function rmcolormap() {
-        svg.selectAll("circle.ixp-dots").style("fill", "none");
+        svg.selectAll(/*"circle.ixp-dots"*/".IXP").style("fill", "none");
         svg.selectAll("circle.asn-dots").style("fill", "none");
-        svg.selectAll("customer").style("stroke", "none")
-        svg.selectAll("peer").style("stroke", "none")
-        svg.selectAll("sibling").style("stroke", "none")
+        svg.selectAll("customer").style("stroke", "none");
+        svg.selectAll("peer").style("stroke", "none");
+        svg.selectAll("sibling").style("stroke", "none");
+        raiseUp();
 
       }
       //Method to color the map (plot all ixps and asns)
       function colormap() {
-        svg.selectAll("circle.ixp-dots").style("fill", "rgba(169, 103, 201, 0.7)");
+        svg.selectAll(/*"circle.ixp-dots"*/".IXP").style("fill", "rgba(169, 103, 201, 0.7)");
         svg.selectAll("circle.asn-dots").style("fill", "rgb(255,255,0,0.7)");
         svg.selectAll("customer").style("stroke", "green");
         svg.selectAll("peer").style("stroke", "red");
         svg.selectAll("sibling").style("stroke", "turquoise");
+        raiseUp();
 
+      }
+
+      function raiseUp(){
+        svg.selectAll(".IXP").raise();
+        svg.selectAll("circle.asn-dots").raise();
       }
 
       function clickCountry(d, i) {
@@ -363,11 +412,12 @@
 
         drawEverything();
         hiddenOrVisible("hidden", country);
+        raiseUp();
       }
 
       function hiddenOrVisible(option, country) {
 
-        svg.selectAll("circle.ixp-dots").filter(function (value, index) { return value.country != country }).style("visibility", option);
+        svg.selectAll(/*"circle.ixp-dots"*/".IXP").filter(function (value, index) { return value.country != country }).style("visibility", option);
 
         svg.selectAll("circle.asn-dots").filter(function (value, index) { return value.country != country }).style("visibility", option);
 
@@ -376,11 +426,12 @@
         svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility",option);        
 
         svg.selectAll("g.asn-container").filter(function (value, index) { return value.country != country }).style("visibility", option);
+        raiseUp();
       }
 
       function drawEverything() {
 
-        svg.selectAll("circle.ixp-dots").style("visibility", "visible");
+        svg.selectAll(/*"circle.ixp-dots"*/".IXP").style("visibility", "visible");
         svg.selectAll("circle.asn-dots").style("visibility", "visible");
 
         svg.selectAll("customer").style("visibility", "visible");
@@ -392,10 +443,12 @@
         svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility","visible");
 
         svg.selectAll("g.asn-container").style("visibility","visible");
+        raiseUp();
+        svg.selectAll(".country").lower();
       }
 
       function removeEverything(){
-        svg.selectAll("circle.ixp-dots").style("visibility", "hidden");
+        svg.selectAll(/*"circle.ixp-dots"*/".IXP").style("visibility", "hidden");
         svg.selectAll("circle.asn-dots").style("visibility", "hidden");
         svg.selectAll("customer").style("visibility", "hidden");
         svg.selectAll("peer").style("visibility", "hidden");
@@ -407,6 +460,7 @@
 
 
         svg.selectAll("g.asn-container").style("visibility","hidden");
+        raiseUp();
       }
 
 
