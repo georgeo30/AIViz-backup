@@ -1,0 +1,24 @@
+g country="Etswahini"
+{
+  path class="border" d="coordinates"
+
+  g class="ixp-container IXP-Number" => onClick() => 1.Draw ixp-dot 2.Draw asn customers
+    {
+        circle class="ixp-dot"
+
+    }
+
+
+  g class="asn-container ASN-Number"
+    {
+        circle class="asn-dot"
+
+        path class="customer-customer" 
+        path class="peer-peer" 
+        path class="sibling-sibling"
+    }
+
+}
+
+
+svg.select("class","Etswahini").select("ixp-number)
