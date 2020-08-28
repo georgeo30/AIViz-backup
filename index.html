@@ -190,8 +190,6 @@
         if (error) throw error;
         //Set id fields as the key for the ixp and asn datasets
         var ixpsbyid = d3.map(ixps, function (d) { return d.id; });
-        console.log(ixpsbyid.get("1306"))
-        console.log(ixpsbyid)
         var asnsbyid = d3.map(asns, function (d) { return d.id; });
 
 
@@ -235,14 +233,18 @@
           }
         });
 
-        var features = topojson.feature(africa, africa.objects.customAfrica).features
+        var features = topojson.feature(africa, africa.objects.customAfrica).features;
 
         //Draw countries
-        svg.selectAll("path")
+        //EDIT FIX BORDER
+        svg.selectAll(".country") //now selecting all svg elements by class country...ask if this should be null or g, changed from path, as we dont want to append countries to something else? or does it replace?
           .data(features)
-          .attr("class", "country")
-          .enter().append("path")
-          .attr("class", "countries")
+          /*.attr("class", "country")*/  //ask about this line... no class being added to anything? or is it because of ln 239?
+          .enter().append("g")
+          .attr("class","country")
+          .attr("id",function(d){return d.properties.name})
+          .append("path")
+          .attr("class", "border")
           .attr("d", path)
           .on("click", clickCountry);
 
@@ -252,6 +254,11 @@
         //   .datum({ type: "MultiPoint", coordinates: ixps })
         //   .attr("class", "ixp-dots ")
         //   .attr("d", path);
+        console.log(svg.select(".country"))
+
+        /*Now we need to select all the countries, and add the IXPs to each country yes?*/
+        //svg.selectAll(".country").enter().data(ixps).filter(function(d){return d.country==this.id})
+
 
         svg.selectAll("ixp-dots")
           .data(ixps)
@@ -393,9 +400,14 @@
         svg.selectAll("customer").style("visibility", "hidden");
         svg.selectAll("peer").style("visibility", "hidden");
         svg.selectAll("sibling").style("visibility", "hidden");
+
+        svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", "hidden");
+        svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", "hidden");
+        svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility","hidden");
+
+
         svg.selectAll("g.asn-container").style("visibility","hidden");
       }
-
 
 
 

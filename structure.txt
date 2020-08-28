@@ -1,4 +1,4 @@
-g country="Etswahini"
+g class = country, id="Etswahini"
 {
   path class="border" d="coordinates"
 
@@ -9,7 +9,10 @@ g country="Etswahini"
     }
 
 
-  g class="asn-container ASN-Number"
+  
+
+}
+g class="asn-container ASN-Number"
     {
         circle class="asn-dot"
 
@@ -17,8 +20,6 @@ g country="Etswahini"
         path class="peer-peer" 
         path class="sibling-sibling"
     }
-
-}
 
 
 svg.select("class","Etswahini").select("ixp-number)
