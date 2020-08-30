@@ -5,8 +5,7 @@
 
 <!--Styling of elements on map-->
 <style>
-  .country-area
-    {
+  .country-area {
     fill: black;
     stroke: #fff;
   }
@@ -50,8 +49,7 @@
     stroke: blue;
   }
 
-  .IXP
-    {
+  .IXP {
     fill: rgba(169, 103, 201, 0.7);
 
   }
@@ -77,9 +75,44 @@
         </label></input>
       </div>
     </a>
+    <a class="w3-bar-item">Views</a>
+
+    <!-- Continental View checkbox -->
     <a href="#" class="w3-bar-item w3-button item">
-      <div> <input type="checkbox" id="allixpsandasns" onclick="allixpsandasnscb()" onche checked="checked"> <label>All
-          Show all
+      <div> <input type="checkbox" id="allixpsandasns" onclick="allixpsandasnscb()" checked="checked">
+        <label>Continental View
+        </label><br>
+
+        </label></input>
+      </div>
+
+    </a>
+
+
+    <a class="w3-bar-item">Relationships</a>
+
+    <!-- Peer to peer cb -->
+    <a href="#" class="w3-bar-item w3-button item">
+      <div> <input type="checkbox" id="p2pcb" onclick="peerToPeer()" checked="checked"> <label>Peer to Peer
+        </label><br>
+
+        </label></input>
+      </div>
+
+    </a>
+    <!-- customer to provider relationship -->
+    <a href="#" class="w3-bar-item w3-button item">
+      <div> <input type="checkbox" id="c2pcb" onclick="customerToProvider()" checked="checked"> <label>Customer to provider
+        </label><br>
+
+        </label></input>
+      </div>
+
+    </a>
+    <!-- sibling to sibling relationship -->
+
+    <a href="#" class="w3-bar-item w3-button item">
+      <div> <input type="checkbox" id="s2scb" onclick="siblingToSibling()" checked="checked"> <label>Sibling to Sibling
         </label><br>
 
         </label></input>
@@ -116,7 +149,7 @@
       document.getElementById("cbborder").onclick = function () {
         if (this.checked) {
           var cols = document.getElementsByClassName(/*'countries'*/'country');
-          console.log(cols)
+          
           for (i = 0; i < cols.length; i++) {
             cols[i].style.stroke = 'white';
 
@@ -154,7 +187,7 @@
       var path = d3.geoPath()
         .projection(projection);
 
-          //ASN projection
+      //ASN projection
       var pathTwo = d3.geoPath()
         .projection(projection)
         .pointRadius(5);
@@ -163,6 +196,16 @@
         .attr("width", width)
         .attr("height", height);
 
+      //Methods used to know what filtering methods must be applied
+      var currentView;
+      var currentViewedCountry;
+
+      
+      var p2pCheckBox = document.getElementById("p2pcb");
+
+      var c2pCheckBox = document.getElementById("c2pcb");
+
+      var s2sCheckBox = document.getElementById("s2scb");
       //Load data... Should we split this up into callable methods?
       d3.queue()
         .defer(d3.json, "testTopoAfrica.json")
@@ -173,9 +216,11 @@
 
       //Load data: Alternative
       // d3.queue()
-      //   .defer(d3.json, "http://192.168.0.18:8080/topoAfrica.json")
+      //   .defer(d3.json, "http://192.168.0.18:8080/testTopoAfrica.json")
       //   .defer(d3.csv, "http://192.168.0.18:8080/ixps.csv", typeIxp)
+      //   .defer(d3.csv, "http://192.168.0.18:8080/asns.csv", typeAsn)
       //   .defer(d3.csv, "http://192.168.0.18:8080/links.csv")
+
       //   .await(ready);
 
 
@@ -232,38 +277,38 @@
 
         //Add drawing-box that will contain all country drawings
         var drawingBox = svg.append("g")
-            .attr("class","drawing-box")
+          .attr("class", "drawing-box")
 
         //Draw countries inside the drawing box using the geoJson features
-            drawingBox.selectAll(null) //null is used since no country-area element has been created before
-            .data(features)
-            .enter()
-            .append("path")
-            .attr("class", "country-area")
-            .attr("d", path)
-            .on("click", clickCountry);
+        drawingBox.selectAll(null) //null is used since no country-area element has been created before
+          .data(features)
+          .enter()
+          .append("path")
+          .attr("class", "country-area")
+          .attr("d", path)
+          .on("click", clickCountry);
 
         //Add empty country-containers that will contain asn and ixp elements
-        var countries =svg.selectAll(null) //null is used since no country containers have been defined before (no search time -> more efficient )
+        var countries = svg.selectAll(null) //null is used since no country containers have been defined before (no search time -> more efficient )
           .data(features)
           .enter().append("g")
           .attr("class", "country-container")
-          .attr("id", function (currentFeature) { console.log(currentFeature);return currentFeature.properties.country_code });
-          /*.attr("class", "country")*/  //ask about this line... no class being added to anything? or is it because of ln 239?
+          .attr("id", function (currentFeature) { return currentFeature.properties.country_code });
+        /*.attr("class", "country")*/  //ask about this line... no class being added to anything? or is it because of ln 239?
 
 
         // Add IXP elements to each country container
         countries
           .each(
             function (currentFeature, i) {
-              
+
               //d3.select(this) ->  Country-container element
-              var currentCountry = d3.select(this); 
+              var currentCountry = d3.select(this);
 
               //Append IXP circles located in the current country
               currentCountry.selectAll("circle")
-              .data(ixps.filter(function (currentIxp) {  return currentIxp.country == currentCountry.attr("id") }))
-              .enter()
+                .data(ixps.filter(function (currentIxp) { return currentIxp.country == currentCountry.attr("id") }))
+                .enter()
                 .append("circle")
                 .attr("class", "IXP")
                 .attr("id", function (currentIxp) { return currentIxp.id })
@@ -271,8 +316,8 @@
                 .attr("cy", function (currentIxp) { return projection([currentIxp.longitude, currentIxp.latitude])[1] })
                 .style("fill", "rgba(169, 103, 201, 0.7)")
                 .attr("r", 8);
-              });
-    
+            });
+
         /* HOW TO FILTER A SELECTION
         svg.selectAll(".country").filter(function(d,i){
           return d3.select(this).attr("id")=="Algeria";
@@ -308,111 +353,160 @@
         //customer-peer
         asnContainers.append("path")
           .attr("class", "customer")
-          .attr("d", function (d) { return pathTwo(d.customer_peer); });
+          .attr("d", function (d) { return path(d.customer_peer); });
 
         asnContainers.append("path")
           .attr("class", "same-customer")
-          .attr("d", function (d) { return pathTwo(d.same_customer_peer); });
+          .attr("d", function (d) { return path(d.same_customer_peer); });
         //peeer_peer
         asnContainers.append("path")
           .attr("class", "peer")
-          .attr("d", function (d) { return pathTwo(d.peer_peer); });
+          .attr("d", function (d) { return path(d.peer_peer); });
 
         asnContainers.append("path")
           .attr("class", "same-peer")
-          .attr("d", function (d) { return pathTwo(d.same_peer_peer); });
+          .attr("d", function (d) { return path(d.same_peer_peer); });
 
         //sibling_sibling
         asnContainers.append("path")
           .attr("class", "sibling")
-          .attr("d", function (d) { return pathTwo(d.sibling_sibling); });
+          .attr("d", function (d) { return path(d.sibling_sibling); });
 
         asnContainers.append("path")
           .attr("class", "same-sibling")
-          .attr("d", function (d) { return pathTwo(d.same_sibling_sibling); });
+          .attr("d", function (d) { return path(d.same_sibling_sibling); });
         //End for adding asn relationships
 
+        currentView = "continental"
 
 
-        
+
+
       }; //end of reading files
 
       // All IXPs and ASNs checkbox
       function allixpsandasnscb() {
+
+        
+        currentView = "continental";
+        
         var allixpsandasns = document.getElementById("allixpsandasns");
 
         if (allixpsandasns.checked == true) {
-          drawEverything();
+          drawEverything(true);
 
-          console.log("executing everything");
+          
 
 
-        } else {  
-          removeEverything();
+        } else {
+          drawEverything(false); //remove everything
         }
-        
+
       }
+
+
+      // Check box for Peer to peer
+      function peerToPeer() {
+        var visibilityStatus = document.getElementById("p2pcb").checked;
+        setType("peer",visibilityStatus);
+      }
+
+      // Check box for Customer to provider
+      function customerToProvider() {
+        var visibilityStatus = document.getElementById("c2pcb").checked;
+        setType("customer",visibilityStatus);
+      }
+      // Check box for sibling to sibling
+      function siblingToSibling() {
+        var visibilityStatus = document.getElementById("s2scb").checked;
+        setType("sibling",visibilityStatus);
+      }
+
+      function setType(relationshipType, visible)
+      {
+          visibilityStatus = (visible) ? "visible" : "hidden";
+
+          if (currentView.toLowerCase() == "continental")
+          {
+          svg.selectAll("g.asn-container").selectAll(`path.${relationshipType}`).style("visibility", visibilityStatus);
+          svg.selectAll("g.asn-container").selectAll(`path.same-${relationshipType}`).style("visibility", visibilityStatus);
+          }
+          else if(currentView.toLowerCase() == "national")
+          {
+            svg.selectAll("g.asn-container").selectAll(`path.same-${relationshipType}`).style("visibility", function(currentASN){ return (currentASN.country == currentViewedCountry && visible ? "visible" : "hidden")});
+            
+          }
+          
+      }
+
 
       function clickCountry(d, i) {
+        document.getElementById("allixpsandasns").checked = false;
 
+        
         var clickedCountry = d.properties.country_code;
+        currentViewedCountry = d.properties.country_code;
 
-        drawEverything();
-        hiddenOrVisible("hidden", clickedCountry);
-        
+        currentView = "national";
+
+        // drawEverything(true);
+
+        showCountry(clickedCountry);
+
       }
 
-      function hiddenOrVisible(option, country) {
+      function showCountry(country) {
 
-        svg.selectAll(".IXP").filter(function (value, index) { return value.country != country }).style("visibility", option);
+        // svg.selectAll(".IXP").filter(function (value, index) { return value.country != country }).style("visibility", option);
+        svg.selectAll(".IXP").style("visibility", function (value) {return (value.country == country ? "visible":"hidden")});
 
-        svg.selectAll("circle.asn-dots").filter(function (value, index) { return value.country != country }).style("visibility", option);
-
-        svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", option);
-        svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", option);
-        svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility", option);
-
-        svg.selectAll("g.asn-container").filter(function (value, index) { return value.country != country }).style("visibility", option);
+        svg.selectAll("circle.asn-dots").style("visibility", function(value){return (value.country == country ? "visible":"hidden")});
         
-      }
-
-      function drawEverything() {
-
-        svg.selectAll(/*"circle.ixp-dots"*/".IXP").style("visibility", "visible");
-        svg.selectAll("circle.asn-dots").style("visibility", "visible");
-
-        svg.selectAll("customer").style("visibility", "visible");
-        svg.selectAll("peer").style("visibility", "visible");
-        svg.selectAll("sibling").style("visibility", "visible");
-
-        svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", "visible");
-        svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", "visible");
-        svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility", "visible");
-
-        svg.selectAll("g.asn-container").style("visibility", "visible");
-        
-        
-      }
-
-      function removeEverything() {
-        svg.selectAll(/*"circle.ixp-dots"*/".IXP").style("visibility", "hidden");
-        svg.selectAll("circle.asn-dots").style("visibility", "hidden");
-        
-        svg.selectAll("customer").style("visibility", "hidden");
-        svg.selectAll("peer").style("visibility", "hidden");
-        svg.selectAll("sibling").style("visibility", "hidden");
-
         svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", "hidden");
         svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", "hidden");
         svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility", "hidden");
 
+        svg.selectAll("g.asn-container").selectAll("path.same-customer").style("visibility", function(currentASN){ return ((currentASN.country == country && c2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.same-peer").style("visibility", function(currentASN){ return ((currentASN.country == country && p2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.same-sibling").style("visibility", function(currentASN){ return ((currentASN.country == country && s2sCheckBox.checked ? "visible" : "hidden")) });
 
-        svg.selectAll("g.asn-container").style("visibility", "hidden");
-        
+        // svg.selectAll("g.asn-container").filter(function (value, index) { return value.country != country }).style("visibility", option);
+
       }
+      //true: draws all elements on the map
+      //false: removes all elements on the map
+      function drawEverything(showEverything) {
+
+        var visibilityStatus = showEverything ? "visible" : "hidden";
+
+        svg.selectAll(".IXP").style("visibility", visibilityStatus);
+
+        svg.selectAll("circle.asn-dots").style("visibility", visibilityStatus);
+
+        svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility",function(currentASN){ return (( showEverything && c2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility",function(currentASN){ return (( showEverything && p2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility", function(currentASN){ return (( showEverything && s2sCheckBox.checked ? "visible" : "hidden")) });
 
 
+        
+        svg.selectAll("g.asn-container").selectAll("path.same-customer").style("visibility",function(currentASN){ return (( showEverything && c2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.same-peer").style("visibility",function(currentASN){ return (( showEverything && p2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.same-sibling").style("visibility", function(currentASN){ return (( showEverything && s2sCheckBox.checked ? "visible" : "hidden")) });
 
+        // svg.selectAll(".IXP").style("visibility", visibilityStatus);
+        // svg.selectAll("circle.asn-dots").style("visibility", visibilityStatus);
+
+        // svg.selectAll("customer").style("visibility", visibilityStatus);
+        // svg.selectAll("peer").style("visibility", visibilityStatus);
+        // svg.selectAll("sibling").style("visibility", visibilityStatus);
+
+        // svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", visibilityStatus);
+        // svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", visibilityStatus);
+        // svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility", visibilityStatus);
+
+        // svg.selectAll("g.asn-container").style("visibility", visibilityStatus);
+
+      }
 
 
       function typeIxp(d) {
