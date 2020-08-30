@@ -148,7 +148,7 @@
       }
       document.getElementById("cbborder").onclick = function () {
         if (this.checked) {
-          var cols = document.getElementsByClassName(/*'countries'*/'country');
+          var cols = document.getElementsByClassName(/*'countries'*/'country-area');
           
           for (i = 0; i < cols.length; i++) {
             cols[i].style.stroke = 'white';
@@ -158,7 +158,7 @@
 
         }
         else {
-          var cols = document.getElementsByClassName(/*'countries'*/'country');
+          var cols = document.getElementsByClassName(/*'countries'*/'country-area');
           for (i = 0; i < cols.length; i++) {
             cols[i].style.stroke = 'black';
 
