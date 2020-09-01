@@ -59,15 +59,17 @@
 
   }
 </style>
-<!--Burger Menu and filters-->
+<!--hamburger Menu, filters and map-->
 
 <body style="background-color: 	#cae7f9;">
   <div class="w3-sidebar w3-bar-block w3-dark-grey w3-animate-left" style="display:none; background-color: white;"
     id="mySidebar">
+    <!-- Header and Menu button -->
     <div style="background-color: black; color:white;">
       <button class="w3-button w3-xlarge w3-hover-black w3-bar-item" onclick=" w3_close()">&times;
         <h3 style=" display: inline-block; ">Africa Internet Visualizer</h3></button>
     </div>
+    <!-- Border checkbox -->
     <a href="#" class="w3-bar-item w3-button item">
       <div> <input type="checkbox" id="cbborder" name="vehicle1" checked="checked"> <label
           for="vehicle1">Borders</label><br>
@@ -75,11 +77,12 @@
         </label></input>
       </div>
     </a>
+    <!-- Different Views options -->
     <a class="w3-bar-item">Views</a>
 
     <!-- Continental View checkbox -->
     <a href="#" class="w3-bar-item w3-button item">
-      <div> <input type="checkbox" id="allixpsandasns" onclick="allixpsandasnscb()" checked="checked">
+      <div> <input type="checkbox" id="allixpsandasns" onclick="continentalView()" checked="checked">
         <label>Continental View
         </label><br>
 
@@ -88,7 +91,7 @@
 
     </a>
 
-
+    <!-- Relationship Views Options -->
     <a class="w3-bar-item">Relationships</a>
 
     <!-- Peer to peer cb -->
@@ -102,7 +105,8 @@
     </a>
     <!-- customer to provider relationship -->
     <a href="#" class="w3-bar-item w3-button item">
-      <div> <input type="checkbox" id="c2pcb" onclick="customerToProvider()" checked="checked"> <label>Customer to provider
+      <div> <input type="checkbox" id="c2pcb" onclick="customerToProvider()" checked="checked"> <label>Customer to
+          provider
         </label><br>
 
         </label></input>
@@ -122,8 +126,8 @@
 
 
 
-    <!-- <a href="#" class="w3-bar-item w3-button">Link 2</a>
-    <a href="#" class="w3-bar-item w3-button">Link 3</a> -->
+    <!-- Header and Menu button -->
+
   </div>
   <div style="background-color: black;">
     <button id="openNav" class="w3-button w3-xlarge w3-hover-black w3-bar-item"
@@ -135,6 +139,7 @@
   <div id="main">
 
     <script>
+      //Organizing Side Navigation bar
       function w3_open() {
         document.getElementById("main").style.marginLeft = "25%";
         document.getElementById("mySidebar").style.width = "25%";
@@ -146,10 +151,12 @@
         document.getElementById("mySidebar").style.display = "none";
         document.getElementById("openNav").style.display = "inline-block";
       }
+
+      //Border color method
       document.getElementById("cbborder").onclick = function () {
         if (this.checked) {
           var cols = document.getElementsByClassName(/*'countries'*/'country-area');
-          
+
           for (i = 0; i < cols.length; i++) {
             cols[i].style.stroke = 'white';
 
@@ -191,6 +198,7 @@
       var pathTwo = d3.geoPath()
         .projection(projection)
         .pointRadius(5);
+
       //Add canvas with settings for its height and width, store the reference here in svg
       var svg = d3.select("#main").append("svg")
         .attr("width", width)
@@ -198,14 +206,15 @@
 
       //Methods used to know what filtering methods must be applied
       var currentView;
+
       var currentViewedCountry;
 
-      
       var p2pCheckBox = document.getElementById("p2pcb");
 
       var c2pCheckBox = document.getElementById("c2pcb");
 
       var s2sCheckBox = document.getElementById("s2scb");
+
       //Load data... Should we split this up into callable methods?
       d3.queue()
         .defer(d3.json, "testTopoAfrica.json")
@@ -228,6 +237,7 @@
       function ready(error, africa, ixps, asns, links) {
 
         if (error) throw error;
+
         //Set id fields as the key for the ixp and asn datasets
         var ixpsbyid = d3.map(ixps, function (d) { return d.id; });
         var asnsbyid = d3.map(asns, function (d) { return d.id; });
@@ -239,6 +249,7 @@
           //get source/target asns from an id field 
           var source = asnsbyid.get(link.origin)
           var target = asnsbyid.get(link.destination);
+
           //add link type to asn
           if (link.type == "c2p") {
             if (source.country != target.country) {
@@ -273,9 +284,10 @@
           }
         });
 
+        //Convert each country from the topology file to a geoJson feature
         var features = topojson.feature(africa, africa.objects.testAfrica).features;
 
-        //Add drawing-box that will contain all country drawings
+        //Add drawing-box that will contain all country drawings (outlines of a country & an onclick method)
         var drawingBox = svg.append("g")
           .attr("class", "drawing-box")
 
@@ -294,8 +306,6 @@
           .enter().append("g")
           .attr("class", "country-container")
           .attr("id", function (currentFeature) { return currentFeature.properties.country_code });
-        /*.attr("class", "country")*/  //ask about this line... no class being added to anything? or is it because of ln 239?
-
 
         // Add IXP elements to each country container
         countries
@@ -318,19 +328,8 @@
                 .attr("r", 8);
             });
 
-        /* HOW TO FILTER A SELECTION
-        svg.selectAll(".country").filter(function(d,i){
-          return d3.select(this).attr("id")=="Algeria";
-        }).append("circle").attr("cx", 1).attr("cy", 1);
-        */
 
-        /*
-        HOW TO ADD AN ELEMENT TO EACH THING IN A SELECTION
-        svg.selectAll(".country").each(function(d,i){
-          d3.select(this).append("circle").attr("cx", 1).attr("cy", 1);
-        });
-        */
-
+        // Add ASN circles to the svg canvas using the read in asn elements
         svg.selectAll("asn-dots")
           .data(asns)
           .enter()
@@ -377,6 +376,7 @@
           .attr("d", function (d) { return path(d.same_sibling_sibling); });
         //End for adding asn relationships
 
+        //Set the currentView to continental, this will be used to simplify the transitions for onClick event handlers
         currentView = "continental"
 
 
@@ -385,18 +385,14 @@
       }; //end of reading files
 
       // All IXPs and ASNs checkbox
-      function allixpsandasnscb() {
-
-        
+      function continentalView() {
         currentView = "continental";
-        
+
         var allixpsandasns = document.getElementById("allixpsandasns");
 
         if (allixpsandasns.checked == true) {
+
           drawEverything(true);
-
-          
-
 
         } else {
           drawEverything(false); //remove everything
@@ -406,44 +402,46 @@
 
 
       // Check box for Peer to peer
+      //Triggers a call to disable/enable all peer-peer relationships
       function peerToPeer() {
         var visibilityStatus = document.getElementById("p2pcb").checked;
-        setType("peer",visibilityStatus);
+        setType("peer", visibilityStatus);
       }
 
       // Check box for Customer to provider
+      //Triggers a call to disable/enable all customer-provider relationships
       function customerToProvider() {
         var visibilityStatus = document.getElementById("c2pcb").checked;
-        setType("customer",visibilityStatus);
+        setType("customer", visibilityStatus);
       }
       // Check box for sibling to sibling
+      //Triggers a call to disable/enable all sibling-sibling relationships
       function siblingToSibling() {
         var visibilityStatus = document.getElementById("s2scb").checked;
-        setType("sibling",visibilityStatus);
+        setType("sibling", visibilityStatus);
       }
 
-      function setType(relationshipType, visible)
-      {
-          visibilityStatus = (visible) ? "visible" : "hidden";
+      //ContinentalView: Enables/disables all realtionships of the specified type 
+      //NationalView: Enables/disables relationships for the currently clicked country of the specified type
+      function setType(relationshipType, visible) {
+        visibilityStatus = (visible) ? "visible" : "hidden";
 
-          if (currentView.toLowerCase() == "continental")
-          {
+        if (currentView.toLowerCase() == "continental") {
           svg.selectAll("g.asn-container").selectAll(`path.${relationshipType}`).style("visibility", visibilityStatus);
           svg.selectAll("g.asn-container").selectAll(`path.same-${relationshipType}`).style("visibility", visibilityStatus);
-          }
-          else if(currentView.toLowerCase() == "national")
-          {
-            svg.selectAll("g.asn-container").selectAll(`path.same-${relationshipType}`).style("visibility", function(currentASN){ return (currentASN.country == currentViewedCountry && visible ? "visible" : "hidden")});
-            
-          }
-          
+        }
+        else if (currentView.toLowerCase() == "national") {
+          svg.selectAll("g.asn-container").selectAll(`path.same-${relationshipType}`).style("visibility", function (currentASN) { return (currentASN.country == currentViewedCountry && visible ? "visible" : "hidden") });
+
+        }
+
       }
 
-
+      //Changes state variables and makes a call to the eventhandler by passing in the currently clicked country
       function clickCountry(d, i) {
         document.getElementById("allixpsandasns").checked = false;
 
-        
+
         var clickedCountry = d.properties.country_code;
         currentViewedCountry = d.properties.country_code;
 
@@ -454,24 +452,23 @@
         showCountry(clickedCountry);
 
       }
-
+      //Ensures that only ASN's & IXP's and it's internal relationships are displayed by using a passed in country reference
       function showCountry(country) {
 
         // svg.selectAll(".IXP").filter(function (value, index) { return value.country != country }).style("visibility", option);
-        svg.selectAll(".IXP").style("visibility", function (value) {return (value.country == country ? "visible":"hidden")});
+        svg.selectAll(".IXP").style("visibility", function (value) { return (value.country == country ? "visible" : "hidden") });
 
-        svg.selectAll("circle.asn-dots").style("visibility", function(value){return (value.country == country ? "visible":"hidden")});
-        
+        svg.selectAll("circle.asn-dots").style("visibility", function (value) { return (value.country == country ? "visible" : "hidden") });
+
         svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", "hidden");
         svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", "hidden");
         svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility", "hidden");
 
-        svg.selectAll("g.asn-container").selectAll("path.same-customer").style("visibility", function(currentASN){ return ((currentASN.country == country && c2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("g.asn-container").selectAll("path.same-peer").style("visibility", function(currentASN){ return ((currentASN.country == country && p2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("g.asn-container").selectAll("path.same-sibling").style("visibility", function(currentASN){ return ((currentASN.country == country && s2sCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.same-customer").style("visibility", function (currentASN) { return ((currentASN.country == country && c2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.same-peer").style("visibility", function (currentASN) { return ((currentASN.country == country && p2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.same-sibling").style("visibility", function (currentASN) { return ((currentASN.country == country && s2sCheckBox.checked ? "visible" : "hidden")) });
 
         // svg.selectAll("g.asn-container").filter(function (value, index) { return value.country != country }).style("visibility", option);
-
       }
       //true: draws all elements on the map
       //false: removes all elements on the map
@@ -483,54 +480,41 @@
 
         svg.selectAll("circle.asn-dots").style("visibility", visibilityStatus);
 
-        svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility",function(currentASN){ return (( showEverything && c2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility",function(currentASN){ return (( showEverything && p2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility", function(currentASN){ return (( showEverything && s2sCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", function (currentASN) { return ((showEverything && c2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", function (currentASN) { return ((showEverything && p2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility", function (currentASN) { return ((showEverything && s2sCheckBox.checked ? "visible" : "hidden")) });
 
 
-        
-        svg.selectAll("g.asn-container").selectAll("path.same-customer").style("visibility",function(currentASN){ return (( showEverything && c2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("g.asn-container").selectAll("path.same-peer").style("visibility",function(currentASN){ return (( showEverything && p2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("g.asn-container").selectAll("path.same-sibling").style("visibility", function(currentASN){ return (( showEverything && s2sCheckBox.checked ? "visible" : "hidden")) });
 
-        // svg.selectAll(".IXP").style("visibility", visibilityStatus);
-        // svg.selectAll("circle.asn-dots").style("visibility", visibilityStatus);
-
-        // svg.selectAll("customer").style("visibility", visibilityStatus);
-        // svg.selectAll("peer").style("visibility", visibilityStatus);
-        // svg.selectAll("sibling").style("visibility", visibilityStatus);
-
-        // svg.selectAll("g.asn-container").selectAll("path.customer").style("visibility", visibilityStatus);
-        // svg.selectAll("g.asn-container").selectAll("path.peer").style("visibility", visibilityStatus);
-        // svg.selectAll("g.asn-container").selectAll("path.sibling").style("visibility", visibilityStatus);
-
-        // svg.selectAll("g.asn-container").style("visibility", visibilityStatus);
+        svg.selectAll("g.asn-container").selectAll("path.same-customer").style("visibility", function (currentASN) { return ((showEverything && c2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.same-peer").style("visibility", function (currentASN) { return ((showEverything && p2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll("g.asn-container").selectAll("path.same-sibling").style("visibility", function (currentASN) { return ((showEverything && s2sCheckBox.checked ? "visible" : "hidden")) });
 
       }
 
-
+      //Modifies the IXP element so that it may be drawn on screen
       function typeIxp(d) {
         d[0] = +d.longitude;
         d[1] = +d.latitude;
-        d.arcs = { type: "MultiLineString", coordinates: [] };
-
         return d;
       }
+      //Modifies the ASN element by converting attributes to numbers and by adding list attributes that contain the relationships that an asn has with other asns
       function typeAsn(d) {
 
         d[0] = +d.longitude;
         d[1] = +d.latitude;
 
-        //Add relationship arrays to each asn
-        d.customer_peer = { type: "MultiLineString", coordinates: [] };
-        d.same_customer_peer = { type: "MultiLineString", coordinates: [] };
 
+
+        //Internal relationships (2 asns within the same country)
         d.peer_peer = { type: "MultiLineString", coordinates: [] };
-        d.same_peer_peer = { type: "MultiLineString", coordinates: [] };
-
         d.sibling_sibling = { type: "MultiLineString", coordinates: [] };
-        d.same_sibling_sibling = { type: "MultiLineString", coordinates: [] };
+        d.customer_peer = { type: "MultiLineString", coordinates: [] };
 
+        //External relationshipps (2 asns that are not located in the same country)
+        d.same_customer_peer = { type: "MultiLineString", coordinates: [] };
+        d.same_peer_peer = { type: "MultiLineString", coordinates: [] };
+        d.same_sibling_sibling = { type: "MultiLineString", coordinates: [] };
 
 
         return d;
