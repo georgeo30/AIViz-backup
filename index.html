@@ -219,7 +219,7 @@
       d3.queue()
         .defer(d3.json, "testTopoAfrica.json")
         .defer(d3.csv, "ixps.csv", typeIxp)
-        .defer(d3.csv, "asns.csv", typeAsn)
+        .defer(d3.csv, "asnTest.csv", typeAsn)
         .defer(d3.csv, "links.csv")
         .await(ready);
 
@@ -242,7 +242,7 @@
         var ixpsbyid = d3.map(ixps, function (d) { return d.id; });
         var asnsbyid = d3.map(asns, function (d) { return d.id; });
 
-
+        
 
         //add each link to an asn
         links.forEach(function (link) {
@@ -344,7 +344,27 @@
         var asnContainers = svg.selectAll(".asn-container")
           .data(asns)
           .enter().append("g")
-          .attr("class", function (d) { return `${d.country} asn-container` });
+          .attr("class", function (d) { return `${d.country} asn-container` })
+          .each(function(asn,i){
+            var currentContainer = d3.select(this); 
+            var keys = asn.map.keys();
+            var c_long = asn.longitude;
+            var c_lat = asn.latitude;
+
+            keys.forEach(function(destinationKey){
+              var value = asn.map.get(destinationKey);
+              destinationAsn = asnsbyid(destinationKey);
+              currentContainer.append("path")
+                .attr("d",)
+
+            })
+          });
+
+        
+        asnContainers.selectAll("relationships").
+        
+
+        
 
 
         //Add the asn relationships to each asn
@@ -378,9 +398,6 @@
 
         //Set the currentView to continental, this will be used to simplify the transitions for onClick event handlers
         currentView = "continental"
-
-
-
 
       }; //end of reading files
 
@@ -496,6 +513,9 @@
       function typeIxp(d) {
         d[0] = +d.longitude;
         d[1] = +d.latitude;
+
+        d.customers = d.customers.split(",");
+
         return d;
       }
       //Modifies the ASN element by converting attributes to numbers and by adding list attributes that contain the relationships that an asn has with other asns
@@ -504,14 +524,43 @@
         d[0] = +d.longitude;
         d[1] = +d.latitude;
 
+        // d.map = JSON.parse(d.map);
+        var kv_pairs =  d.map.split(" ");
 
+        d.map = new Map();
 
-        //Internal relationships (2 asns within the same country)
-        d.peer_peer = { type: "MultiLineString", coordinates: [] };
+        kv_pairs.forEach(function(pair)
+        {
+          split_pairs = pair.split(":");
+          d.map.set(split_pairs[0],split_pairs[1]);
+        })
+        
+        console.log(d.map);
+
+        
+
+        
+
+        
+
+        //ASN
+        // country, location, name
+        // map < destASN, relationship-type >
+
+        //Plot asns: 1.IXP view 2.National View 3.Continental View
+
+        //Country view: 
+
+        //External relationships (2 asns within the same country)
+        d.peer_peer = { type: "MultiLineString", coordinates: [] };  [ [0,1] , [0,3], [0,4] ]  //Ixp [0, 1]
         d.sibling_sibling = { type: "MultiLineString", coordinates: [] };
         d.customer_peer = { type: "MultiLineString", coordinates: [] };
 
-        //External relationshipps (2 asns that are not located in the same country)
+        
+
+        
+
+        //Internal relationshipps (2 asns that are not located in the same country)
         d.same_customer_peer = { type: "MultiLineString", coordinates: [] };
         d.same_peer_peer = { type: "MultiLineString", coordinates: [] };
         d.same_sibling_sibling = { type: "MultiLineString", coordinates: [] };
