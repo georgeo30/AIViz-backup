@@ -341,17 +341,20 @@
                 .attr("class", "IXP")
                 .attr("id", function (currentIxp) { return currentIxp.id })
                 .on("click", IxpView)
-
-
-
-
             });
 
-        //Create asn-containers that will contain the asn links
-        var asnContainers = svg.selectAll(".asn")
-          .data(asns)
-          .enter().append("g")
-          .attr("class", function (d) { return `${d.country} asn` })
+
+        countries
+          .each(
+            function (currentFeature, i) {
+
+              //d3.select(this) ->  Country-container element
+              var currentCountry = d3.select(this);
+              //Append IXP circles located in the current country
+              currentCountry.selectAll(null)
+                .data(asns.filter(function (currentASN) { return currentASN.country == currentCountry.attr("id") }))
+                .enter().append("g")
+          .attr("class", function (d) { return `asn` })
           .each(function(sourceAsn,i){
 
             var currentContainer = d3.select(this); //g element 
@@ -369,13 +372,62 @@
 
           
           currentContainer.append("circle")
-          .attr("class", function (d) { return `${d.country} asn-dot` })
+          .attr("class", function (d) { return `asn-dot` })
           .attr("cx", function (d) { return projection([d.longitude, d.latitude])[0] })
           .attr("cy", function (d) { return projection([d.longitude, d.latitude])[1] })
           .style("fill", "rgb(255,255,0,0.7)")
           .attr("r", 4);
             
-        }); 
+        });
+            });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //Create asn-containers that will contain the asn links
+        // var asnContainers = svg.selectAll(".asn")
+        //   .data(asns)
+        //   .enter().append("g")
+        //   .attr("class", function (d) { return `${d.country} asn` })
+        //   .each(function(sourceAsn,i){
+
+        //     var currentContainer = d3.select(this); //g element 
+            
+            
+        //     var values = ""
+        //     sourceAsn.map.forEach(function(relationshipType, destinationKey, map){ //loop through every key-value pair
+        //       var destinationAsn = asnsbyid.get(destinationKey);
+        //       currentRelationship = { type: "LineString", coordinates: [sourceAsn,destinationAsn] };
+        //       currentContainer.append("path")
+        //         .attr("d",path(currentRelationship))
+        //         .attr("class",relationshipType);
+
+        //       })
+
+          
+        //   currentContainer.append("circle")
+        //   .attr("class", function (d) { return `${d.country} asn-dot` })
+        //   .attr("cx", function (d) { return projection([d.longitude, d.latitude])[0] })
+        //   .attr("cy", function (d) { return projection([d.longitude, d.latitude])[1] })
+        //   .style("fill", "rgb(255,255,0,0.7)")
+        //   .attr("r", 4);
+            
+        // }); 
             
 
             // keys.forEach(function(destinationKey){
