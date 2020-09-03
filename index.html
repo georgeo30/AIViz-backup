@@ -15,7 +15,7 @@
     fill: #cccccc;
   }
 
-  .customer {
+  .c2p {
     stroke: green;
     fill: none;
   }
@@ -25,7 +25,7 @@
     fill: none;
   }
 
-  .peer {
+  .p2p {
     stroke: red;
     fill: none;
   }
@@ -35,7 +35,7 @@
     fill: none;
   }
 
-  .sibling {
+  .s2s {
     stroke: turquoise;
     fill: none;
   }
@@ -329,6 +329,7 @@
             });
 
 
+
         // Add ASN circles to the svg canvas using the read in asn elements
         svg.selectAll("asn-dots")
           .data(asns)
@@ -339,65 +340,85 @@
           .attr("cy", function (d) { return projection([d.longitude, d.latitude])[1] })
           .style("fill", "rgb(255,255,0,0.7)")
           .attr("r", 4);
-
+          
         //Create asn-containers that will contain the asn links
         var asnContainers = svg.selectAll(".asn-container")
           .data(asns)
           .enter().append("g")
           .attr("class", function (d) { return `${d.country} asn-container` })
-          .each(function(asn,i){
-            var currentContainer = d3.select(this); 
-            var keys = asn.map.keys();
-            var c_long = asn.longitude;
-            var c_lat = asn.latitude;
+          .each(function(sourceAsn,i){
 
-            keys.forEach(function(destinationKey){
-              var value = asn.map.get(destinationKey);
-              destinationAsn = asnsbyid(destinationKey);
+            var currentContainer = d3.select(this); //g element 
+            
+            
+            var values = ""
+            sourceAsn.map.forEach(function(relationshipType, destinationKey, map){ //loop through every key-value pair
+              var destinationAsn = asnsbyid.get(destinationKey);
+              currentRelationship = { type: "LineString", coordinates: [sourceAsn,destinationAsn] };
               currentContainer.append("path")
-                .attr("d",)
+                .attr("d",path(currentRelationship))
+                .attr("class",relationshipType);
 
-            })
+              })
+
+          
+
+              
+            
+            
+
+            // keys.forEach(function(destinationKey){
+            //   var value = asn.map.get(destinationKey);
+            //   destinationAsn = asnsbyid(destinationKey);
+
+            //   currentRelationship = { type: "LineString", coordinates: [] };
+
+            //   currentPath.coordinates.push([asn, destinationAsn]);
+              
+            //   currentContainer.append("path")
+            //     .attr("d", path(currentRelationship));
+
+            // })
           });
 
         
-        asnContainers.selectAll("relationships").
+        // asnContainers.selectAll("relationships").
         
 
         
 
 
-        //Add the asn relationships to each asn
+        // //Add the asn relationships to each asn
 
-        //customer-peer
-        asnContainers.append("path")
-          .attr("class", "customer")
-          .attr("d", function (d) { return path(d.customer_peer); });
+        // //customer-peer
+        // asnContainers.append("path")
+        //   .attr("class", "customer")
+        //   .attr("d", function (d) { return path(d.customer_peer); });
 
-        asnContainers.append("path")
-          .attr("class", "same-customer")
-          .attr("d", function (d) { return path(d.same_customer_peer); });
-        //peeer_peer
-        asnContainers.append("path")
-          .attr("class", "peer")
-          .attr("d", function (d) { return path(d.peer_peer); });
+        // asnContainers.append("path")
+        //   .attr("class", "same-customer")
+        //   .attr("d", function (d) { return path(d.same_customer_peer); });
+        // //peeer_peer
+        // asnContainers.append("path")
+        //   .attr("class", "peer")
+        //   .attr("d", function (d) { return path(d.peer_peer); });
 
-        asnContainers.append("path")
-          .attr("class", "same-peer")
-          .attr("d", function (d) { return path(d.same_peer_peer); });
+        // asnContainers.append("path")
+        //   .attr("class", "same-peer")
+        //   .attr("d", function (d) { return path(d.same_peer_peer); });
 
-        //sibling_sibling
-        asnContainers.append("path")
-          .attr("class", "sibling")
-          .attr("d", function (d) { return path(d.sibling_sibling); });
+        // //sibling_sibling
+        // asnContainers.append("path")
+        //   .attr("class", "sibling")
+        //   .attr("d", function (d) { return path(d.sibling_sibling); });
 
-        asnContainers.append("path")
-          .attr("class", "same-sibling")
-          .attr("d", function (d) { return path(d.same_sibling_sibling); });
-        //End for adding asn relationships
+        // asnContainers.append("path")
+        //   .attr("class", "same-sibling")
+        //   .attr("d", function (d) { return path(d.same_sibling_sibling); });
+        // //End for adding asn relationships
 
-        //Set the currentView to continental, this will be used to simplify the transitions for onClick event handlers
-        currentView = "continental"
+        // //Set the currentView to continental, this will be used to simplify the transitions for onClick event handlers
+        // currentView = "continental"
 
       }; //end of reading files
 
@@ -535,7 +556,7 @@
           d.map.set(split_pairs[0],split_pairs[1]);
         })
         
-        console.log(d.map);
+
 
         
 
