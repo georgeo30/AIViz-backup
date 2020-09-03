@@ -78,3 +78,17 @@ id,name,country,latitude,longitude,customers
 1910,Goma Internet Exchange,COD,-1.65868,29.17309,"2,4,6"
 1921,Niger Internet Exchange,NER,13.48243,2.17493,"4,10,25,29"
 1955,Maroc Internet Exchange Point,MAR,34.05000,-6.77000,"6,17,19"
+
+
+
+
+
+
+
+
+Country
+{
+    ixp list -> 1.ixp-dot 2.list asn-customers [1, 4, 6]
+    
+    asn list -> 1.asn-dot 2.list path-elements
+}
