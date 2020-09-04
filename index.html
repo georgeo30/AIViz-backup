@@ -10,15 +10,6 @@
     stroke: #fff;
   }
 
-  
-  .triangle-up {
-      width: 0;
-      height: 0;
-      border-left: 50px solid transparent;
-      border-right: 50px solid transparent;
-      border-bottom: 100px solid red;
-    }
-
   /*.countries*/
   .country-area:hover {
     fill: #cccccc;
@@ -253,45 +244,45 @@
 
         
 
-        //add each link to an asn
-        links.forEach(function (link) {
-          //get source/target asns from an id field 
-          var source = asnsbyid.get(link.origin)
-          var target = asnsbyid.get(link.destination);
+        // //add each link to an asn
+        // links.forEach(function (link) {
+        //   //get source/target asns from an id field 
+        //   var source = asnsbyid.get(link.origin)
+        //   var target = asnsbyid.get(link.destination);
 
-          //add link type to asn
-          if (link.type == "c2p") {
-            if (source.country != target.country) {
-              source.customer_peer.coordinates.push([source, target]);
-              target.customer_peer.coordinates.push([target, source]);
-            }
-            else {
-              source.same_customer_peer.coordinates.push([source, target]);
-              target.same_customer_peer.coordinates.push([target, source]);
-            }
-          }
+        //   //add link type to asn
+        //   if (link.type == "c2p") {
+        //     if (source.country != target.country) {
+        //       source.customer_peer.coordinates.push([source, target]);
+        //       target.customer_peer.coordinates.push([target, source]);
+        //     }
+        //     else {
+        //       source.same_customer_peer.coordinates.push([source, target]);
+        //       target.same_customer_peer.coordinates.push([target, source]);
+        //     }
+        //   }
 
-          else if (link.type == "p2p") {
-            if (source.country != target.country) {
-              source.peer_peer.coordinates.push([source, target]);
-              target.peer_peer.coordinates.push([target, source]);
-            }
-            else {
-              source.same_peer_peer.coordinates.push([source, target]);
-              target.same_peer_peer.coordinates.push([target, source]);
-            }
-          }
-          else {
-            if (source.country != target.country) {
-              source.sibling_sibling.coordinates.push([source, target]);
-              target.sibling_sibling.coordinates.push([target, source]);
-            }
-            else {
-              source.same_sibling_sibling.coordinates.push([source, target]);
-              target.same_sibling_sibling.coordinates.push([target, source]);
-            }
-          }
-        });
+        //   else if (link.type == "p2p") {
+        //     if (source.country != target.country) {
+        //       source.peer_peer.coordinates.push([source, target]);
+        //       target.peer_peer.coordinates.push([target, source]);
+        //     }
+        //     else {
+        //       source.same_peer_peer.coordinates.push([source, target]);
+        //       target.same_peer_peer.coordinates.push([target, source]);
+        //     }
+        //   }
+        //   else {
+        //     if (source.country != target.country) {
+        //       source.sibling_sibling.coordinates.push([source, target]);
+        //       target.sibling_sibling.coordinates.push([target, source]);
+        //     }
+        //     else {
+        //       source.same_sibling_sibling.coordinates.push([source, target]);
+        //       target.same_sibling_sibling.coordinates.push([target, source]);
+        //     }
+        //   }
+        // });
 
         //Convert each country from the topology file to a geoJson feature
         var features = topojson.feature(africa, africa.objects.testAfrica).features;
@@ -301,7 +292,7 @@
           .attr("class", "drawing-box")
 
         //Draw countries inside the drawing box using the geoJson features
-        drawingBox.selectAll(null) //null is used since no country-area element has been created before
+        drawingBox.selectAll(".country-area") //null is used since no country-area element has been created before
           .data(features)
           .enter()
           .append("path")
@@ -310,14 +301,13 @@
           .on("click", clickCountry);
 
         //Add empty country-containers that will contain asn and ixp elements
-        var countries = svg.selectAll(null) //null is used since no country containers have been defined before (no search time -> more efficient )
+        var countries = svg.selectAll(".country") //null is used since no country containers have been defined before (no search time -> more efficient )
           .data(features)
           .enter().append("g")
           .attr("class", "country")
           .attr("id", function (currentFeature) { return currentFeature.properties.country_code });
 
-          // svg.append("polygon").attr("points","600 0, 0 800, 1200 800").attr("transform","translate(10,10)");
-          // svg.append("polygon").attr("points","600 0, 0 800, 1200 800");
+    
 
         // Add IXP elements to each country container
         countries
@@ -326,16 +316,17 @@
 
               //d3.select(this) ->  Country-container element
               var currentCountry = d3.select(this);
-              var arc = d3.symbol().type(d3.symbolTriangle);
               //Append IXP circles located in the current country
-              currentCountry.selectAll(null)
+              currentCountry.selectAll(".IXP")
                 .data(ixps.filter(function (currentIxp) { return currentIxp.country == currentCountry.attr("id") }))
                 .enter()
                 .append("polygon")
                 .attr("points", function(currentIxp){
+                  var len = 10;
+                  var cons = (Math.sqrt(3))/2;
                   var centerX = projection([currentIxp.longitude, currentIxp.latitude])[0];
                   var centerY = projection([currentIxp.longitude, currentIxp.latitude])[1];
-                  return `${centerX-13.86},${centerY+8} ${centerX},${centerY-16} ${centerX+13.86},${centerY+8}`;
+                  return `${centerX-(len*cons)},${centerY+(len/2)} ${centerX},${centerY-len} ${centerX+(len*cons)},${centerY+(len/2)}`;
 
                 })
                 .attr("class", "IXP")
@@ -354,7 +345,7 @@
               currentCountry.selectAll(null)
                 .data(asns.filter(function (currentASN) { return currentASN.country == currentCountry.attr("id") }))
                 .enter().append("g")
-          .attr("class", function (d) { return `asn` })
+          .attr("class", function (d) { return "ASN" }).attr("id",function(d){return "ASN_"+d.id})
           .each(function(sourceAsn,i){
 
             var currentContainer = d3.select(this); //g element 
@@ -366,7 +357,8 @@
               currentRelationship = { type: "LineString", coordinates: [sourceAsn,destinationAsn] };
               currentContainer.append("path")
                 .attr("d",path(currentRelationship))
-                .attr("class",relationshipType);
+                .attr("class",relationshipType)
+                .attr("destination",destinationAsn.id);
 
               })
 
@@ -562,16 +554,29 @@
 
         // svg.selectAll(".IXP").filter(function (value, index) { return value.country != country }).style("visibility", option);
         svg.selectAll(".IXP").style("visibility", function (value) { return (value.country == country ? "visible" : "hidden") });
+        //console.log(svg.selectAll("#asn_23.asn-dot")/*.filter(function(value){return value.id=="23"})*/);
+        svg.selectAll(".ASN").filter(function(value){return(value.country!=country)}).style("visibility")
+        svg.selectAll(".ASN").filter(function (value) { return (value.country == country)}).selectAll("path").style("visibility", function (value) { return (svg.select(`#${value.destination}.asn-dot`).country == country ? "visible" : "hidden") });
+        // test.each(
+        //   function(d,i){
+        //     var currentRelationship = svg.select(this);
+        //     var destASNCountry = svg.select(`#${currentRelationship.destination}.asn-dot`).country;
+        //     console.log(destASNCountry);
+        //   }
+        // )
+        // svg.selectAll(`#${country}`).selectAll(".c2p").style("visibility",function(){return((true)?"visible":"hidden")})
+        // svg.selectAll(`#${country}`).selectAll(".c2p").each(
+        //   function(data,index){
+        //     var destASNid = svg.select(this).destination;
+        //     var destASNcountry = svg.select(`#${destASNid}.asn-dot`)
 
-        svg.selectAll("circle.asn-dot").style("visibility", function (value) { return (value.country == country ? "visible" : "hidden") });
+        //   }
+        // )
 
-        svg.selectAll("asn").selectAll("path.customer").style("visibility", "hidden");
-        svg.selectAll("asn").selectAll("path.peer").style("visibility", "hidden");
-        svg.selectAll("asn").selectAll("path.sibling").style("visibility", "hidden");
-
-        svg.selectAll("asn").selectAll("path.same-customer").style("visibility", function (currentASN) { return ((currentASN.country == country && c2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("asn").selectAll("path.same-peer").style("visibility", function (currentASN) { return ((currentASN.country == country && p2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("asn").selectAll("path.same-sibling").style("visibility", function (currentASN) { return ((currentASN.country == country && s2sCheckBox.checked ? "visible" : "hidden")) });
+        
+        // svg.selectAll(".c2p").style("visibility", function (currentASN) { return ((currentASN.country == country && c2pCheckBox.checked ? "visible" : "hidden")) });
+        // svg.selectAll(".p2p").style("visibility", function (currentASN) { return ((currentASN.country == country && p2pCheckBox.checked ? "visible" : "hidden")) });
+        // svg.selectAll(".s2s").style("visibility", function (currentASN) { return ((currentASN.country == country && s2sCheckBox.checked ? "visible" : "hidden")) });
 
         // svg.selectAll("asn-container").filter(function (value, index) { return value.country != country }).style("visibility", option);
       }
@@ -581,20 +586,15 @@
 
         var visibilityStatus = showEverything ? "visible" : "hidden";
 
-        svg.selectAll(".IXP").style("visibility", visibilityStastus);
+        svg.selectAll(".IXP").style("visibility", visibilityStatus);
 
-        svg.selectAll("circle.asn-dot").style("visibility", visibilityStatus);
+        svg.selectAll(".asn-dot").style("visibility", visibilityStatus);
 
-        svg.selectAll("asn").selectAll("path.customer").style("visibility", function (currentASN) { return ((showEverything && c2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("asn").selectAll("path.peer").style("visibility", function (currentASN) { return ((showEverything && p2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("asn").selectAll("path.sibling").style("visibility", function (currentASN) { return ((showEverything && s2sCheckBox.checked ? "visible" : "hidden")) });
+        console.log(svg.selectAll(".ASN"))
 
-
-
-        svg.selectAll("asn").selectAll("path.same-customer").style("visibility", function (currentASN) { return ((showEverything && c2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("asn").selectAll("path.same-peer").style("visibility", function (currentASN) { return ((showEverything && p2pCheckBox.checked ? "visible" : "hidden")) });
-        svg.selectAll("asn").selectAll("path.same-sibling").style("visibility", function (currentASN) { return ((showEverything && s2sCheckBox.checked ? "visible" : "hidden")) });
-
+        svg.selectAll(".c2p").style("visibility", function (currentASN) { return ((showEverything && c2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll(".p2p").style("visibility", function (currentASN) { return ((showEverything && p2pCheckBox.checked ? "visible" : "hidden")) });
+        svg.selectAll(".s2s").style("visibility", function (currentASN) { return ((showEverything && s2sCheckBox.checked ? "visible" : "hidden")) });
       }
 
       //Modifies the IXP element so that it may be drawn on screen
