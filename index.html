@@ -232,7 +232,7 @@
       d3.queue()
         .defer(d3.json, "http://192.168.0.18:8080/testTopoAfrica.json")
         .defer(d3.csv, "http://192.168.0.18:8080/ixps.csv", typeIxp)
-        .defer(d3.csv, "http://192.168.0.18:8080/asnTestTwo.csv", typeAsn)
+        .defer(d3.csv, "http://192.168.0.18:8080/asnTest.csv", typeAsn)
         .defer(d3.csv, "http://192.168.0.18:8080/links.csv")
 
         .await(ready);
@@ -297,17 +297,42 @@
             .each(function (d, i) {
 
               var currentContainer = d3.select(this); //g element 
+              console.log(currentContainer);
+              var p2pGroup = currentContainer.append("g").attr("relationship", "p2p");
 
+              var c2pGroup = currentContainer.append("g").attr("relationship", "c2p");
+
+              var s2sGroup = currentContainer.append("g").attr("relationship", "s2s");
 
               var values = ""
               sourceAsn.map.forEach(function (relationshipType, destinationKey, map) { //loop through every key-value pair
+
                 var destinationAsn = asnsbyid.get(destinationKey);
                 currentRelationship = { type: "LineString", coordinates: [sourceAsn, destinationAsn] };
-                currentContainer.append("path")
-                  .attr("d", path(currentRelationship))
-                  .attr("class", relationshipType)
-                  .style("visibility", "inherit")
-                  .attr("destination", destinationAsn.id);
+                switch (relationshipType) {
+                  case "p2p":
+                    p2pGroup.append("path")
+                      .attr("d", path(currentRelationship))
+                      .attr("class", relationshipType)
+                      .style("visibility", "inherit")
+                      .attr("destination", destinationAsn.id);
+                    break;
+                  case "c2p":
+                    c2pGroup.append("path")
+                      .attr("d", path(currentRelationship))
+                      .attr("class", relationshipType)
+                      .style("visibility", "inherit")
+                      .attr("destination", destinationAsn.id);
+                    break;
+                  case "s2s":
+                    s2sGroup.append("path")
+                      .attr("d", path(currentRelationship))
+                      .attr("class", relationshipType)
+                      .style("visibility", "inherit")
+                      .attr("destination", destinationAsn.id);
+
+                }
+
 
               })
 
@@ -338,7 +363,7 @@
         if (currentView == "national") {
           revertToCountryInherit();
         }
-        else if (currentView=="IXP"){
+        else if (currentView == "IXP") {
           revertToIXPInherit();
         }
         currentView = "continental";
@@ -401,8 +426,8 @@
 
         }
 
-        
-        currentView="IXP";
+
+        currentView = "IXP";
         clickedIxp = d.id;
         showIxp(clickedIxp);
       }
@@ -416,9 +441,9 @@
         // var countryAsns = [];
         //plots the ixp that was clicked, also gets the customer ASNs of that IXP
         svg.select(`#IXP_${clickedIxp}`).style("visibility", function (value) {
-          
-            customerAsns = value.customers;
-            return "visible";
+
+          customerAsns = value.customers;
+          return "visible";
         });
 
         //Finding the country for each customer in the customerAsns list
@@ -434,13 +459,13 @@
               if (customerAsns.includes(d.id)) {
                 d3.select(this).select(".asn-dot").style("visibility", "visible");
                 d3.select(this).selectAll("path")
-                .each(function(d,i){
+                  .each(function (d, i) {
                     var destinationAsn = asnsbyid.get(d3.select(this).attr("destination"));
-                    if(customerAsns.includes(destinationAsn.id)){
-                      d3.select(this).style("visibility","visible");
+                    if (customerAsns.includes(destinationAsn.id)) {
+                      d3.select(this).style("visibility", "visible");
                     }
 
-                })
+                  })
                 // .style("visibility", function (d) {
                 //   var destinationAsn = asnsbyid.get(d3.select(this).attr("destination"));
                 //   return customerAsns.includes(destinationAsn.id) ? "visible" : "inherit";
@@ -462,10 +487,10 @@
         if (currentView == "national") {
           revertToCountryInherit();
         }
-        else if (currentView=="IXP"){
+        else if (currentView == "IXP") {
           revertToIXPInherit();
         }
-      
+
 
         var clickedCountry = d.properties.country_code;
         previousCountry = d.properties.country_code;
@@ -482,20 +507,23 @@
 
         //svg.selectAll(".country").selectAll("path").style("visibility", "hidden");
         svg.selectAll(".country").style("visibility", function (value) { return value.properties.country_code == country ? "visible" : "hidden" });
+      
+
         svg.select(`#${country}.country`).selectAll("path").style("visibility", function (d) {
 
           var destinationAsn = asnsbyid.get(d3.select(this).attr("destination"));
           return destinationAsn.country == country ? "visible" : "hidden";
 
         })
+        
 
       }
 
       function revertToCountryInherit() {
-        svg.select(`#${previousCountry}.country`).selectAll("path").style("visibility","inherit"); 
+        svg.select(`#${previousCountry}.country`).selectAll("path").style("visibility", "inherit");
       }
-      function revertToIXPInherit(){
-        
+      function revertToIXPInherit() {
+
         svg.select(`#IXP_${clickedIxp}`).style("visibility", "inherit");
 
 
@@ -507,13 +535,13 @@
               if (customerAsns.includes(d.id)) {
                 d3.select(this).select(".asn-dot").style("visibility", "inherit");
                 d3.select(this).selectAll("path")
-                .each(function(d,i){
+                  .each(function (d, i) {
                     var destinationAsn = asnsbyid.get(d3.select(this).attr("destination"));
-                    if(customerAsns.includes(destinationAsn.id)){
-                      d3.select(this).style("visibility","inherit");
+                    if (customerAsns.includes(destinationAsn.id)) {
+                      d3.select(this).style("visibility", "inherit");
                     }
 
-                })
+                  })
 
               }
             })
@@ -528,8 +556,8 @@
       //true: draws all elements on the map
       //false: removes all elements on the map
       function drawEverything(showFlag) {
-        showFlag =showFlag ? "visible":"hidden";
-        svg.selectAll(".country").style("visibility",showFlag);
+        showFlag = showFlag ? "visible" : "hidden";
+        svg.selectAll(".country").style("visibility", showFlag);
 
 
       }
