@@ -123,6 +123,15 @@
       </div>
 
     </a>
+    <div class="w3-dropdown-hover">
+      <button class="w3-button dropDownLevels">Select ASN Level <i class="fa fa-caret-down"></i></button>
+      <div class="w3-dropdown-content w3-bar-block">
+        <a href="#" class="w3-bar-item w3-button level" id="1" onclick="levelClick(event)">Level 1</a>
+        <a href="#" class="w3-bar-item w3-button level" id="2" onclick="levelClick(event)">Level 2</a>
+        <a href="#" class="w3-bar-item w3-button level" id="3" onclick="levelClick(event)">Level 3</a>
+
+      </div>
+    </div>
 
 
 
@@ -155,7 +164,7 @@
       //Border color method
       document.getElementById("cbborder").onclick = function () {
         if (this.checked) {
-          var cols = document.getElementsByClassName(/*'countries'*/'country-area');
+          let cols = document.getElementsByClassName(/*'countries'*/'country-area');
 
           for (i = 0; i < cols.length; i++) {
             cols[i].style.stroke = 'white';
@@ -165,7 +174,7 @@
 
         }
         else {
-          var cols = document.getElementsByClassName(/*'countries'*/'country-area');
+          let cols = document.getElementsByClassName(/*'countries'*/'country-area');
           for (i = 0; i < cols.length; i++) {
             cols[i].style.stroke = 'black';
 
@@ -179,6 +188,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://kit.fontawesome.com/a68d1a8f9d.js" crossorigin="anonymous"></script>
+
     <!--D3 work starts here-->
     <script>
 
@@ -209,10 +220,25 @@
 
       var previousCountry;
 
-      var clickedIxp;
+      //var clickedIxp;
+
+      var previousIXP;
+
       var customerAsns;
+
       var countryAsns = [];
 
+      var ixpsbyid;
+
+      var asnsbyid;
+
+      var level = 1;
+
+      var asnViewMap;
+
+      var levelsMap;
+
+      var previousLevel;
 
       var p2pCheckBox = document.getElementById("p2pcb");
 
@@ -220,27 +246,24 @@
 
       var s2sCheckBox = document.getElementById("s2scb");
 
-      //Load data... Should we split this up into callable methods?
-      // d3.queue()
-      //   .defer(d3.json, "testTopoAfrica.json")
-      //   .defer(d3.csv, "ixps.csv", typeIxp)
-      //   .defer(d3.csv, "asnTest.csv", typeAsn)
-      //   // .defer(d3.csv, "links.csv")
-      //   .await(ready);
-
-      //Load data: Alternative
+      // Load data... Should we split this up into callable methods?
       d3.queue()
-        .defer(d3.json, "http://192.168.0.18:8080/testTopoAfrica.json")
-        .defer(d3.csv, "http://192.168.0.18:8080/ixps.csv", typeIxp)
-        .defer(d3.csv, "http://192.168.0.18:8080/asnTest.csv", typeAsn)
-        .defer(d3.csv, "http://192.168.0.18:8080/links.csv")
-
+        .defer(d3.json, "testTopoAfrica.json")
+        .defer(d3.csv, "ixps.csv", typeIxp)
+        .defer(d3.csv, "asnTestLevels.csv", typeAsn)
         .await(ready);
 
-      var ixpsbyid;
-      var asnsbyid;
+      // Load data: Alternative
+      // d3.queue()
+      //   .defer(d3.json, "http://192.168.0.18:8080/testTopoAfrica.json")
+      //   .defer(d3.csv, "http://192.168.0.18:8080/ixps.csv", typeIxp)
+      //   .defer(d3.csv, "http://192.168.0.18:8080/asnTestTwo.csv", typeAsn)
+      //   .defer(d3.csv, "http://192.168.0.18:8080/links.csv")
+      //   .await(ready);
+
+
       //Callback after data is loaded
-      function ready(error, africa, ixps, asns, links) {
+      function ready(error, africa, ixps, asns) {
 
         if (error) throw error;
 
@@ -252,18 +275,10 @@
         //Convert each country from the topology file to a geoJson feature
         var features = topojson.feature(africa, africa.objects.testAfrica).features;
 
-        //Add drawing-box that will contain all country drawings (outlines of a country & an onclick method)
-        var drawingBox = svg.append("g")
-          .attr("class", "drawing-box")
+
 
         //Draw countries inside the drawing box using the geoJson features
-        drawingBox.selectAll(".country-area") //null is used since no country-area element has been created before
-          .data(features)
-          .enter()
-          .append("path")
-          .attr("class", "country-area")
-          .attr("d", path)
-          .on("click", clickCountry);
+        drawCountryBorders(features);
 
         //Add empty country-containers that will contain asn and ixp elements
         var countries = svg.selectAll(".country") //null is used since no country containers have been defined before (no search time -> more efficient )
@@ -273,67 +288,81 @@
           .style("visibility", "visible")
           .attr("id", function (currentFeature) { return currentFeature.properties.country_code });
 
+        //Draw all IXPS
+        drawIXPS(ixps);
+
+        //Draw all ASNS
+        drawASNS(asns);
+
+        // //Set the currentView to continental, this will be used to simplify the transitions for onClick event handlers
+        currentView = "continental"
+
+      }; //end of reading files
+
+      function drawCountryBorders(features) {
+        //Add drawing-box that will contain all country drawings (outlines of a country & an onclick method)
+        let drawingBox = svg.append("g").attr("class", "drawing-box");
+
+        drawingBox.selectAll(null) //null is used since no country-area element has been created before
+          .data(features)
+          .enter()
+          .append("path")
+          .attr("class", "country-area")
+          .attr("d", path)
+          .on("click", clickCountry);
+      }
 
 
-        svg.selectAll(".IXP").data(ixps).enter().each(function (d, i) {
-          var currentCountry = svg.select(`#${d.country}.country`);
-          var currentIxp = d;
-          currentCountry.append("polygon").attr("points", function () {
-            var len = 10;
-            var cons = (Math.sqrt(3)) / 2;
-            var centerX = projection([d.longitude, d.latitude])[0];
-            var centerY = projection([d.longitude, d.latitude])[1];
+      function drawIXPS(ixps) {
+        svg.selectAll("IXP").data(ixps).enter().each(function (currentIxp, i) {
+          let currentCountry = svg.select(`#${currentIxp.country}.country`);
+          currentCountry.append("polygon").datum(currentIxp).attr("points", function () {
+            let len = 10;
+            let cons = (Math.sqrt(3)) / 2;
+            let centerX = projection([currentIxp.longitude, currentIxp.latitude])[0];
+            let centerY = projection([currentIxp.longitude, currentIxp.latitude])[1];
             return `${centerX - (len * cons)},${centerY + (len / 2)} ${centerX},${centerY - len} ${centerX + (len * cons)},${centerY + (len / 2)}`;
-          }).attr("class", "IXP").style("visibility", "inherit").attr("id", function () { return `IXP_${currentIxp.id}` }).on("click", clickIxp)
-            .datum(currentIxp);
-        });
+          }).attr("class", "IXP")
+            .style("visibility", "inherit")
+            .attr("id", function () { return `IXP_${currentIxp.id}` })
+            .on("click", clickIxp);
 
-        svg.selectAll(".ASN").data(asns).enter().each(function (d, i) {
-          var sourceAsn = d;
-          //console.log(d)
-          var currentCountry = svg.select(`#${d.country}.country`);
-          currentCountry.append("g").datum(sourceAsn)
+        });
+      }
+
+      function clickASN(d) {
+        console.log(d);
+      }
+      function drawASNS(asns) {
+
+        svg.selectAll(null).data(asns).enter().each(function (sourceAsn) {
+
+          let currentCountry = svg.select(`#${sourceAsn.country}.country`);
+          currentCountry.append("g").datum(sourceAsn).on("click", clickASN)
             .attr("class", "ASN").style("visibility", "inherit").attr("id", function (d) { return "ASN_" + sourceAsn.id })
             .each(function (d, i) {
 
-              var currentContainer = d3.select(this); //g element 
-              console.log(currentContainer);
-              var p2pGroup = currentContainer.append("g").attr("relationship", "p2p");
+              let currentContainer = d3.select(this); //g element 
 
-              var c2pGroup = currentContainer.append("g").attr("relationship", "c2p");
+              let p2pGroup = currentContainer.append("g").attr("class", "p2p").style("visibility", "inherit");
 
-              var s2sGroup = currentContainer.append("g").attr("relationship", "s2s");
+              let c2pGroup = currentContainer.append("g").attr("class", "c2p").style("visibility", "inherit");
 
-              var values = ""
+              let s2sGroup = currentContainer.append("g").attr("class", "s2s").style("visibility", "inherit");
+
+              let values = "";
+
               sourceAsn.map.forEach(function (relationshipType, destinationKey, map) { //loop through every key-value pair
 
-                var destinationAsn = asnsbyid.get(destinationKey);
+                let destinationAsn = asnsbyid.get(destinationKey);
                 currentRelationship = { type: "LineString", coordinates: [sourceAsn, destinationAsn] };
-                switch (relationshipType) {
-                  case "p2p":
-                    p2pGroup.append("path")
-                      .attr("d", path(currentRelationship))
-                      .attr("class", relationshipType)
-                      .style("visibility", "inherit")
-                      .attr("destination", destinationAsn.id);
-                    break;
-                  case "c2p":
-                    c2pGroup.append("path")
-                      .attr("d", path(currentRelationship))
-                      .attr("class", relationshipType)
-                      .style("visibility", "inherit")
-                      .attr("destination", destinationAsn.id);
-                    break;
-                  case "s2s":
-                    s2sGroup.append("path")
-                      .attr("d", path(currentRelationship))
-                      .attr("class", relationshipType)
-                      .style("visibility", "inherit")
-                      .attr("destination", destinationAsn.id);
 
-                }
-
-
+                currentContainer.select(`g.${relationshipType}`)
+                  .append("path")
+                  .attr("d", path(currentRelationship))
+                  .attr("class", relationshipType)
+                  .style("visibility", "inherit")
+                  .attr("destination", destinationAsn.id);
               })
 
 
@@ -348,134 +377,328 @@
             });
 
         });
-
-
-
-
-
-        // //Set the currentView to continental, this will be used to simplify the transitions for onClick event handlers
-        currentView = "continental"
-
-      }; //end of reading files
+      }
 
       // All IXPs and ASNs checkbox
       function continentalView() {
-        if (currentView == "national") {
-          revertToCountryInherit();
-        }
-        else if (currentView == "IXP") {
-          revertToIXPInherit();
-        }
+
+        revertPreviousView();
+
         currentView = "continental";
 
-        var allixpsandasns = document.getElementById("allixpsandasns");
+        let viewStatus = document.getElementById("allixpsandasns").checked;
 
-        if (allixpsandasns.checked == true) {
-
-          drawEverything(true);
-
-        } else {
-          drawEverything(false); //remove everything
-        }
+        drawEverything(viewStatus);
 
       }
+
+
+
+
 
 
 
       // Check box for Peer to peer
       //Triggers a call to disable/enable all peer-peer relationships
       function peerToPeer() {
-        var visibilityStatus = document.getElementById("p2pcb").checked;
-        setType("peer", visibilityStatus);
+        let visibilityStatus = p2pStatus();
+        setType("p2p", visibilityStatus);
       }
 
       // Check box for Customer to provider
       //Triggers a call to disable/enable all customer-provider relationships
       function customerToProvider() {
-        var visibilityStatus = document.getElementById("c2pcb").checked;
-        setType("customer", visibilityStatus);
+        let visibilityStatus = c2pStatus();
+        setType("c2p", visibilityStatus);
       }
       // Check box for sibling to sibling
       //Triggers a call to disable/enable all sibling-sibling relationships
       function siblingToSibling() {
-        var visibilityStatus = document.getElementById("s2scb").checked;
-        setType("sibling", visibilityStatus);
+        let visibilityStatus = s2sStatus();
+        setType("s2s", visibilityStatus);
+      }
+
+      function c2pStatus() {
+        return c2pCheckBox.checked;
+      }
+      function p2pStatus() {
+        return p2pCheckBox.checked;
+      }
+      function s2sStatus() {
+        return s2sCheckBox.checked;
       }
 
       //ContinentalView: Enables/disables all realtionships of the specified type 
       //NationalView: Enables/disables relationships for the currently clicked country of the specified type
       function setType(relationshipType, visible) {
-        visibilityStatus = (visible) ? "visible" : "hidden";
+        visibilityStatus = (visible) ? "inherit" : "hidden";
 
         if (currentView.toLowerCase() == "continental") {
-          svg.selectAll("asn").selectAll(`path.${relationshipType}`).style("visibility", visibilityStatus);
-          svg.selectAll("asn").selectAll(`path.same-${relationshipType}`).style("visibility", visibilityStatus);
+          svg.selectAll(".ASN").selectAll(`g.${relationshipType}`).each(function (d) {
+            d3.select(this).style("visibility", visibilityStatus);
+          })
+          // svg.selectAll("asn").selectAll(`path.${relationshipType}`).style("visibility", visibilityStatus);
+          // svg.selectAll("asn").selectAll(`path.same-${relationshipType}`).style("visibility", visibilityStatus);
         }
         else if (currentView.toLowerCase() == "national") {
-          svg.selectAll("asn").selectAll(`path.same-${relationshipType}`).style("visibility", function (currentASN) { return (currentASN.country == previousCountry && visible ? "visible" : "hidden") });
-
+          // svg.selectAll(".ASN").selectAll(`path.same-${relationshipType}`).style("visibility", function (currentASN) { return (currentASN.country == previousCountry && visible ? "visible" : "hidden") });
+          svg.select(`#${previousCountry}.country`).selectAll(".ASN").selectAll(`g.${relationshipType}`).each(function (d) {
+            d3.select(this).style("visibility", visibilityStatus);
+          })
         }
 
+        else {
+          let ixpC2pStatus = c2pStatus() ? "inherit" : "hidden";
+          let ixpP2pStatus = p2pStatus() ? "inherit" : "hidden";
+          let ixpS2sStatus = s2sStatus() ? "inherit" : "hidden";
+
+          countryAsns.forEach(function (country) {
+            svg.select(`#${country}.country`).selectAll(".ASN").each(function (d, i) {
+              let asnLevel=asnViewMap.get(d.id.toString());
+              if (asnLevel <=level) {
+                //remove found asn from list?
+                d3.select(this).select("g.c2p").style("visibility", ixpC2pStatus);
+                d3.select(this).select("g.p2p").style("visibility", ixpP2pStatus);
+                d3.select(this).select("g.s2s").style("visibility", ixpS2sStatus);
+              }
+            })
+
+          });
+
+        }
+      }
+
+
+
+
+      function revertPreviousView() {
+        if (currentView === "national") {
+          revertToCountryInherit();
+        }
+        else if (currentView === "IXP") {
+          // console.log('hello');
+          // console.log(previousIXP);
+          // console.log('hello');
+          revertToIXPInherit();
+
+        }
       }
 
       //click IXP
       function clickIxp(d, i) {
         document.getElementById("allixpsandasns").checked = false;
+        // revertPreviousView();
+        // if (currentView == "national")
+        // {
+        //   revertToCountryInherit();
+        // }
         if (currentView == "national") {
           revertToCountryInherit();
+          let clickedIxp = d;
+          previousIXP = d;
 
+
+          asnViewMap = new Map();
+
+          levelsMap = new Map();
+
+
+          currentView = "IXP";
+
+          showIxp(clickedIxp);
         }
+        else if (currentView == "continental") {
+          let clickedIxp = d;
+          previousIXP = d;
 
 
-        currentView = "IXP";
-        clickedIxp = d.id;
-        showIxp(clickedIxp);
+          asnViewMap = new Map();
+
+          levelsMap = new Map();
+
+
+          currentView = "IXP";
+
+          showIxp(clickedIxp);
+        }
+        //otherwise the same IXP has been clicked
+
+
+
+
+
       }
 
+      function levelOne(d) {
+        // plots the ixp that was clicked, also gets the customer ASNs of that IXP
 
-      function showIxp(clickedIxp) {
 
-        //Sets everything on the map to hidden
-        svg.selectAll(".country").style("visibility", "hidden");
-        // var customerAsns;
-        // var countryAsns = [];
-        //plots the ixp that was clicked, also gets the customer ASNs of that IXP
-        svg.select(`#IXP_${clickedIxp}`).style("visibility", function (value) {
+        svg.select(`#${d.country}.country`).selectAll(`#IXP_${d.id}`).each(
+          function (d) {
 
-          customerAsns = value.customers;
-          return "visible";
-        });
+            d3.select(this).style("visibility", "visible");
+            customerAsns = d.customers;
+          }
+        );
+        //setting customer asns to levels map of key 1
+        levelsMap.set("1", customerAsns);
+        levelsMap.set("2", []);
 
+        countryAsns = [];
         //Finding the country for each customer in the customerAsns list
         customerAsns.forEach(function (id) {
           countryAsns.push(asnsbyid.get(id).country);
+          asnViewMap.set(id, "1");
         });
         //Removing duplicates
         countryAsns = [...new Set(countryAsns)];
 
+
+        let ixpC2pStatus = c2pStatus() ? "inherit" : "hidden";
+        let ixpP2pStatus = p2pStatus() ? "inherit" : "hidden";
+        let ixpS2sStatus = s2sStatus() ? "inherit" : "hidden";
+
+
         countryAsns.forEach(function (country) {
-          svg.select(`#${country}.country`).selectAll(".ASN")
-            .each(function (d, i) {
-              if (customerAsns.includes(d.id)) {
-                d3.select(this).select(".asn-dot").style("visibility", "visible");
-                d3.select(this).selectAll("path")
-                  .each(function (d, i) {
-                    var destinationAsn = asnsbyid.get(d3.select(this).attr("destination"));
-                    if (customerAsns.includes(destinationAsn.id)) {
-                      d3.select(this).style("visibility", "visible");
-                    }
+          svg.select(`#${country}.country`).selectAll(".ASN").each(function (d, i) {
+            if (customerAsns.includes(d.id)) {
+              //remove found asn from list?
+              d3.select(this).style("visibility", "visible");
 
-                  })
-                // .style("visibility", function (d) {
-                //   var destinationAsn = asnsbyid.get(d3.select(this).attr("destination"));
-                //   return customerAsns.includes(destinationAsn.id) ? "visible" : "inherit";
+              d3.select(this).select("g.c2p").style("visibility", ixpC2pStatus);
+              d3.select(this).select("g.p2p").style("visibility", ixpP2pStatus);
+              d3.select(this).select("g.s2s").style("visibility", ixpS2sStatus);
 
-                // })
-              }
-            })
+
+              d3.select(this).selectAll("g").each(function (d) {
+                currentGroup = d3.select(this);
+                currentGroup.selectAll("path").each(function (d) {
+                  let pathDestination = d3.select(this).attr("destination");
+                  if (asnViewMap.get(pathDestination) == "1") {
+                    //d3.select(this).style("visibility", "hidden");
+                    //customer asns of level 1 remain as inherit
+                  }
+                  else if (asnViewMap.get(pathDestination) == "2") {
+                    d3.select(this).style("visibility", "hidden");
+
+                  }
+                  else {
+                    asnViewMap.set(pathDestination, "2");
+                    levelsMap.get("2").push(pathDestination);
+                    d3.select(this).style("visibility", "hidden");
+
+                  }
+                  // if (!customerAsns.includes(pathDestination)) {
+                  //   d3.select(this).style("visibility", "hidden");
+                  // }
+
+                })
+
+              })
+
+            }
+          })
+
 
 
         })
+      }
+
+      //Function for levels greater than 1
+      function levelsN(d, i) {
+        let index = i;
+        let nextIndex = index + 1;
+        //index += "";
+        alreadyExists = false;
+        //sets the map for the next layer
+        if (levelsMap.get(nextIndex.toString()) == null) {
+          levelsMap.set(nextIndex.toString(), []);
+        }
+        else {
+          alreadyExists = true;
+          console.log("alreadyExists");
+
+        }
+
+        //Finding the country for each customer in the customerAsns list
+        levelsMap.get(index.toString()).forEach(function (id) {
+          countryAsns.push(asnsbyid.get(id).country);
+        });
+
+        //Removing duplicates
+        countryAsns = [...new Set(countryAsns)];
+
+
+        let ixpC2pStatus = c2pStatus() ? "inherit" : "hidden";
+        let ixpP2pStatus = p2pStatus() ? "inherit" : "hidden";
+        let ixpS2sStatus = s2sStatus() ? "inherit" : "hidden";
+
+
+        countryAsns.forEach(function (country) {
+          svg.select(`#${country}.country`).selectAll(".ASN").each(function (d, i) {
+            if (asnViewMap.get(d.id) == index.toString()) {
+              //remove found asn from list?
+              d3.select(this).style("visibility", "visible");
+
+              d3.select(this).select("g.c2p").style("visibility", ixpC2pStatus);
+              d3.select(this).select("g.p2p").style("visibility", ixpP2pStatus);
+              d3.select(this).select("g.s2s").style("visibility", ixpS2sStatus);
+
+
+              d3.select(this).selectAll("g").each(function (d) {
+                currentGroup = d3.select(this);
+                currentGroup.selectAll("path").each(function (d) {
+                  let pathDestination = d3.select(this).attr("destination");
+                  if (asnViewMap.get(pathDestination) <= index.toString()) {
+                    //d3.select(this).style("visibility", "hidden");
+                    //customer asns of level 1 remain as inherit
+                  }
+                  else if (asnViewMap.get(pathDestination) == nextIndex.toString()) {
+                    d3.select(this).style("visibility", "hidden");
+
+                  }
+                  else {
+                    if (!alreadyExists) {
+                      asnViewMap.set(pathDestination, nextIndex.toString());
+                      levelsMap.get(nextIndex.toString()).push(pathDestination);
+                      d3.select(this).style("visibility", "hidden");
+
+                    }
+                    else {
+                      d3.select(this).style("visibility", "hidden");
+
+                    }
+
+                  }
+
+
+                })
+
+              })
+
+            }
+          })
+
+
+
+        })
+        //console.log(levelsMap);
+
+      }
+
+      function showIxp(d) {
+        //Sets everything on the map to hidden
+        svg.selectAll(".country").style("visibility", "hidden");
+
+        //LEVEL 1:
+        levelOne(d);
+
+        //LEVEL >=1
+        //console.log(level);
+        for (let i = 2; i <= level; i++) {
+
+          levelsN(d, i);
+        }
 
 
 
@@ -483,16 +706,18 @@
 
       //Changes state variables and makes a call to the eventhandler by passing in the currently clicked country
       function clickCountry(d, i) {
+
         document.getElementById("allixpsandasns").checked = false;
+
         if (currentView == "national") {
           revertToCountryInherit();
         }
         else if (currentView == "IXP") {
           revertToIXPInherit();
         }
+        console.log('country clicked');
 
-
-        var clickedCountry = d.properties.country_code;
+        let clickedCountry = d.properties.country_code;
         previousCountry = d.properties.country_code;
 
         currentView = "national";
@@ -502,65 +727,157 @@
         showCountry(clickedCountry);
 
       }
+
+
       //Ensures that only ASN's & IXP's and it's internal relationships are displayed by using a passed in country reference
       function showCountry(country) {
 
         //svg.selectAll(".country").selectAll("path").style("visibility", "hidden");
+
+        // read checkboxes -> ternary operator -> boolean -> visible/hidden -> group container
         svg.selectAll(".country").style("visibility", function (value) { return value.properties.country_code == country ? "visible" : "hidden" });
-      
 
-        svg.select(`#${country}.country`).selectAll("path").style("visibility", function (d) {
+        let countryC2pStatus = c2pStatus() ? "inherit" : "hidden";
+        let countryP2pStatus = p2pStatus() ? "inherit" : "hidden";
+        let countryS2sStatus = s2sStatus() ? "inherit" : "hidden";
 
-          var destinationAsn = asnsbyid.get(d3.select(this).attr("destination"));
-          return destinationAsn.country == country ? "visible" : "hidden";
+        svg.select(`#${country}.country`).selectAll(".ASN").each(function (d) {
+
+          currentAsn = d3.select(this).selectAll("g").each(function (d) {
+            currentGroup = d3.select(this);
+            currentGroup.selectAll("path").style("visibility", function (d) {
+              let destinationAsn = asnsbyid.get(d3.select(this).attr("destination"));
+              return destinationAsn.country == country ? "inherit" : "hidden";
+            })
+
+            if (currentGroup.attr("class") == "c2p") {
+              currentGroup.style("visibility", countryC2pStatus);
+            }
+            else if (currentGroup.attr("class") == "p2p") {
+              currentGroup.style("visibility", countryP2pStatus);
+            }
+            else {
+              currentGroup.style("visibility", countryS2sStatus);
+            }
+
+
+          })
+
 
         })
-        
-
       }
 
       function revertToCountryInherit() {
-        svg.select(`#${previousCountry}.country`).selectAll("path").style("visibility", "inherit");
+        svg.select(`#${previousCountry}.country`).selectAll("g").style("visibility", "inherit").selectAll("path").style("visibility", "inherit");
       }
+
       function revertToIXPInherit() {
 
-        svg.select(`#IXP_${clickedIxp}`).style("visibility", "inherit");
-
-
-
+        //console.log(previousIXP)
+        svg.select(`#${previousIXP.country}.country`).selectAll(`#IXP_${previousIXP.id}`).each(function (d) {
+          d3.select(this).style("visibility", "inherit");
+        });
 
         countryAsns.forEach(function (country) {
-          svg.select(`#${country}.country`).selectAll(".ASN")
-            .each(function (d, i) {
-              if (customerAsns.includes(d.id)) {
-                d3.select(this).select(".asn-dot").style("visibility", "inherit");
-                d3.select(this).selectAll("path")
-                  .each(function (d, i) {
-                    var destinationAsn = asnsbyid.get(d3.select(this).attr("destination"));
-                    if (customerAsns.includes(destinationAsn.id)) {
-                      d3.select(this).style("visibility", "inherit");
-                    }
+          svg.select(`#${country}.country`).selectAll(".ASN").each(function (d, i) {
 
-                  })
-
-              }
-            })
+            console.log("will you enter?");
+            if (asnViewMap.get(d.id) != null) {
+              console.log("lol");
+              //remove found asn from list?
+              d3.select(this).style("visibility", "inherit")
+                .selectAll("g").style("visibility", "inherit")
+                .selectAll("path").style("visibility", "inherit");
+            }
+          })
 
 
         })
-
-
 
       }
 
       //true: draws all elements on the map
       //false: removes all elements on the map
       function drawEverything(showFlag) {
-        showFlag = showFlag ? "visible" : "hidden";
-        svg.selectAll(".country").style("visibility", showFlag);
 
+        showFlag = showFlag ? "visible" : "hidden";
+
+        if (showFlag === "hidden") {
+          svg.selectAll(".country").style("visibility", showFlag);
+        }
+        else {
+
+
+          let countryC2pStatus = c2pStatus() ? "inherit" : "hidden";
+          let countryP2pStatus = p2pStatus() ? "inherit" : "hidden";
+          let countryS2sStatus = s2sStatus() ? "inherit" : "hidden";
+
+          svg.selectAll(".country").each(function (d) {
+
+            d3.select(this).style("visibility", showFlag);
+
+            d3.select(this).selectAll(".ASN").each(function (d) {
+
+              currentAsn = d3.select(this);
+
+              currentAsn.select("g.c2p").style("visibility", countryC2pStatus);
+              currentAsn.select("g.p2p").style("visibility", countryP2pStatus);
+              currentAsn.select("g.s2s").style("visibility", countryS2sStatus);
+
+              //             currentAsn = d3.select(this).selectAll("g").each(function (d) {
+              //               currentGroup = d3.select(this);
+
+
+
+              //               if (currentGroup.attr("class") == "c2p") {
+              //                 currentGroup.style("visibility", countryC2pStatus);
+              //               }
+              //               else if (currentGroup.attr("class") == "p2p") {
+              //                 currentGroup.style("visibility", countryP2pStatus);
+              //               }
+              //               else {
+              //                 currentGroup.style("visibility", countryS2sStatus);
+              //               }
+
+              // })
+
+
+            })
+          })
+
+
+        }
 
       }
+      function levelClick(event) {
+        previousLevel = level;
+        level = +event.target.id;
+        if (currentView == "IXP") {
+          //going up only
+          if (previousLevel < level) {
+            for (let i = (previousLevel + 1); i <= level; i++) {
+              levelsN(previousIXP, i);
+
+            }
+          }
+          else {
+            console.log(levelsMap);
+            countryAsns.forEach(function(country){
+              svg.select(`#${country}.country`).selectAll(".ASN").each(function (d, i) {
+                asnLevel=+asnViewMap.get(d.id.toString());
+                if(asnLevel > level && asnLevel<=previousLevel){
+                  d3.select(this).style("visibility","inherit");
+                  d3.select(this).selectAll("path").style("visibility","inherit");
+                }
+              })
+            })
+          }
+        }
+
+      }
+
+
+
 
       //Modifies the IXP element so that it may be drawn on screen
       function typeIxp(d) {
@@ -578,7 +895,7 @@
         d[1] = +d.latitude;
 
         // d.map = JSON.parse(d.map);
-        var kv_pairs = d.map.split(" ");
+        let kv_pairs = d.map.split(" ");
 
         //Can be improved maybe hopefully
         d.map = new Map();
