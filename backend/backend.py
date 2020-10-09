@@ -13,16 +13,16 @@ AfricaTotals={}
 
 # # MUST DO
 # print("Fetching ASNs, organisations and cone size")
-# AfricanAses = extractAllASNs.getAllASNs("./files/"+str(year)+"/"+str(year)+"0701.ppdc-ases.txt")
+# AfricanAses = extractAllASNs.getAllASNs("./backend/files/"+str(year)+"/"+str(year)+"0701.ppdc-ases.txt")
 # print("ASNs, organisations and cone size fetched")
 # #The Following is optional: save progress
-# temp = open("./files/"+str(year)+"/ASNORGCONE.json","w")
+# temp = open("./backend/files/"+str(year)+"/ASNORGCONE.json","w")
 # temp.write(json.dumps(AfricanAses))
 # temp.close()
 
 # USE WHEN 14-21 has already been done
 print("Fetching ASNs, organisations and cone size")
-f = open("./files/"+str(year)+"/ASNORGCONE.json",'r')
+f = open("./backend/files/"+str(year)+"/ASNORGCONE.json",'r')
 AfricanAses = json.load(f)
 f.close()
 print("ASNs, organisations and cone size fetched")
@@ -33,21 +33,21 @@ print("ASNs, organisations and cone size fetched")
 # print("Locations fetched and total ASN count completed")
 
 # # Optional SAVE
-# newtemp =open("./files/"+str(year)+"/LOCATIONS.json","w")
+# newtemp =open("./backend/files/"+str(year)+"/LOCATIONS.json","w")
 # newtemp.write(json.dumps(AfricanAses))
 # newtemp.flush()
 # newtemp.close()
-# newtemp =open("./files/"+str(year)+"/TOTALS.json","w")
+# newtemp =open("./backend/files/"+str(year)+"/TOTALS.json","w")
 # newtemp.write(json.dumps(AfricaTotals))
 # newtemp.flush()
 # newtemp.close()
 
 # USE WHEN 30-43 DONE
 print("Fetching location data")
-f = open("./files/"+str(year)+"/LOCATIONS.json",'r')
+f = open("./backend/files/"+str(year)+"/LOCATIONS.json",'r')
 AfricanAses = json.load(f)
 f.close()
-f = open("./files/"+str(year)+"/TOTALS.json",'r')
+f = open("./backend/files/"+str(year)+"/TOTALS.json",'r')
 AfricaTotals = json.load(f)
 f.close()
 print("Locations fetched and total ASN count completed")
@@ -59,10 +59,10 @@ AfricanIXPs= getIXPs.prepareIXPs(dictAs)
 print("IXPs prepared with direct ASN customers")
 
 print("Creating relationships")
-AfricanAses = Relationships.makeRelationships(AfricanAses,"./files/"+str(year)+"/"+str(year)+"0701.as-rel.txt")
+AfricanAses = Relationships.makeRelationships(AfricanAses,"./backend/files/"+str(year)+"/"+str(year)+"0701.as-rel.txt")
 print("Relationships between ASes created")
 
-f = open("./ASNS/"+str(year)+".json","w")
+f = open("./backend/ASNS/"+str(year)+".json","w")
 f.write("[")
 f.flush()
 first =True
@@ -110,7 +110,7 @@ f.close()
 print("ASNs written to file")
 
 
-f = open("./IXPS/"+str(year)+".json","w")
+f = open("./backend/IXPS/"+str(year)+".json","w")
 f.write("[")
 first = True
 f.flush()

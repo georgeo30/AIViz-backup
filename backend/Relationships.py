@@ -1,16 +1,7 @@
-# import multiprocessing as mp
-# import requests
-# import time
 import aiohttp
 import asyncio
-# import math
 
 def makeRelationships(ASNDictionary,relationshipFile):
-    # f = open("./backend/asns.txt","r")
-    # ASNLines = f.readlines()
-    # for ASN in ASNLines:
-    #     relationships[ASN.strip("\n")]=[]
-    # f.close()
     for asn in ASNDictionary.keys():
         ASNDictionary[asn]["relationships"]=[]
     f = open(relationshipFile,"r")
@@ -35,8 +26,3 @@ def makeRelationships(ASNDictionary,relationshipFile):
                     ASNDictionary[as2]["relationships"].append(str("ASN_"+as1+"_"+location1+":s2s") if sameorg==True else str("ASN_"+as1+"_"+location1+":p2p") if str(details[2])=="0" else str("ASN_"+as1+"_"+location1+":c2p"))
     f.close()
     return ASNDictionary
-    # f=open("./backend/relationships.txt","w")
-    # for key in relationships.keys():
-    #     f.write("ASN: "+key+"\tRelationships"+str(relationships[key])+"\n")
-    #     f.flush()
-    # f.close()

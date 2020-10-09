@@ -65,7 +65,3 @@ def getAllASNs(filename):
                 ASOrgs[ASNum]["organisation"]=organisation
                 continue
     return ASOrgs
-        # with open('./backend/output.txt','a') as f:
-        #     for item in AfricanASes:
-        #         f.write("%s\n" % item)
-        # print("Batch:",(i+1),"Percentage",(100*(i+1))/max,"Time elapsed:",(time.time()-start))

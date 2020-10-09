@@ -9,7 +9,7 @@ tCount=0
 from shapely.geometry import shape,Point
 asns=[]
 cc = coco.CountryConverter()
-featurefile = open('./customgeo.json','r')
+featurefile = open('./backend/customgeo.json','r')
 js = json.load(featurefile)
 featurefile.close()
 async def getASNsperIXP(IXP, session):
