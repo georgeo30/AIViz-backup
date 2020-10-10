@@ -159,3 +159,8 @@ def prepData(yeartoprocess):
     ASDict=makeRelationshipsForYear(yeartoprocess,ASDict)
     writeASNS(yeartoprocess,ASDict)
     writeIXPS(yeartoprocess,IXPDict)
+
+
+if __name__=="__main__":
+    for year in range(1998,2021):
+        prepData(year)
