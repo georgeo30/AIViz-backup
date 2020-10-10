@@ -162,6 +162,12 @@ def prepData(yeartoprocess):
 
 
 if __name__=="__main__":
+    #PIP3 INSTALL THE FOLLOWING:
+    #flask, flask_cors
+    #aiohttp, asyncio
+    #country-converter
+    #geoip2
+    #Shapely
     for year in range(1998,2021):
         try:
             prepData(year)
