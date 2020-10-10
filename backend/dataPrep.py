@@ -163,4 +163,9 @@ def prepData(yeartoprocess):
 
 if __name__=="__main__":
     for year in range(1998,2021):
-        prepData(year)
+        try:
+            prepData(year)
+            print("Finished",year)
+        except:
+            print("Please redo data processing for",year)
+            continue
