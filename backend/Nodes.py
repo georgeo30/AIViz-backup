@@ -87,7 +87,7 @@ class IXP(Node):
 
         
     def __str__(self):
-        return ("{\"id\":\""+self.id+"\",\"name\":\""+self.name+"\",\"Country\":\""+self.country+"\",\"latitude\":"+self.latitude+",\"longitude\":"+self.longitude+",\"customers\":"+str("\""+",".join(self.customers)+"\"}"))
+        return ("{\"id\":\""+self.id+"\",\"name\":\""+self.name+"\",\"country\":\""+self.country+"\",\"latitude\":"+self.latitude+",\"longitude\":"+self.longitude+",\"customers\":"+str("\""+",".join(self.customers)+"\"}"))
     
 def filterASNContinent(path):
 

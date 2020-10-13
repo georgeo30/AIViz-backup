@@ -1,0 +1,156 @@
+html,
+  body {
+
+    position: fixed;
+  }
+
+  .spinner {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .country-area {
+    fill: rgb(204, 204, 204, 0.9);
+    stroke: black;
+  }
+
+  /*.countries*/
+  .country-area:hover {
+    fill: rgba(240, 240, 240, 0.8);
+    ;
+  }
+
+  .c2p {
+    stroke: rgb(93, 93, 250);
+    stroke-opacity: 0.5;
+    stroke-width: 0.1;
+
+    fill: none;
+  }
+
+  .same-customer {
+    stroke: green;
+    fill: none;
+  }
+
+  .p2p {
+    stroke: rgb(78, 255, 78);
+    stroke-opacity: 0.5;
+    stroke-width: 0.1;
+    fill: none;
+  }
+
+  
+
+  .s2s {
+    stroke: rgb(255, 67, 67);
+    stroke-opacity: 1;
+    stroke-width: 0.25;
+
+    fill: none;
+  }
+
+  .same-sibling {
+    stroke: turquoise;
+    fill: none;
+  }
+
+  .asn:hover {
+    stroke: rgb(84, 84, 236);
+  }
+
+  .IXP {
+
+    fill: rgb(255, 255, 255, 0.1);
+    stroke: rgba(29, 28, 28, 0.9);
+    stroke-width: 1
+  }
+
+  .asn-dot {
+    fill: rgb(255, 255, 255, 0.3);
+    stroke: rgba(29, 28, 28, 0.8);
+
+    stroke-width: 0.5;
+  }
+
+  body,
+  html {
+    height: 100%;
+  }
+
+  body {
+    background-color: #242F3F;
+  }
+
+  .loader {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    position: relative;
+    border: 4px solid #Fff;
+    animation: loader 2s infinite ease;
+  }
+
+  .loader-inner {
+    vertical-align: top;
+    display: inline-block;
+    width: 100%;
+    background-color: #fff;
+    animation: loader-inner 2s infinite ease-in;
+  }
+
+  .loader-wrapper {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(27, 27, 27);
+  }
+
+  @keyframes loader {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    25% {
+      transform: rotate(180deg);
+    }
+
+    50% {
+      transform: rotate(180deg);
+    }
+
+    75% {
+      transform: rotate(360deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes loader-inner {
+    0% {
+      height: 0%;
+    }
+
+    25% {
+      height: 0%;
+    }
+
+    50% {
+      height: 100%;
+    }
+
+    75% {
+      height: 100%;
+    }
+
+    100% {
+      height: 0%;
+    }
+  }

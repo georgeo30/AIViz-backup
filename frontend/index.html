@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<!-- <script src="jquery-2.1.4.js"></script>
+<script src="/js/jquery.min.js"></script> -->
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<title>Africa Internet Visualizer</title>
+
+
+<!--Styling of elements on map-->
+<link rel="stylesheet" href="./styles/styles.css">
+
+<!--hamburger Menu, filters and map-->
+
+<body style="background-color: 	rgba(83, 83, 83, 0.6);">
+
+  <div class="w3-sidebar w3-bar-block w3-dark-grey w3-animate-left" style="display:none; background-color: white;"
+    id="mySidebar">
+    <!-- Header and Menu button -->
+    <div style="background-color: black; color:white;">
+      <button class="w3-button w3-xlarge w3-hover-black w3-bar-item" onclick=" w3_close()">&times;
+        <h3 style=" display: inline-block; ">Africa Internet Visualizer</h3></button>
+    </div>
+    <!-- Border checkbox -->
+    <a href="#" class="w3-bar-item w3-button item">
+      <div> <input type="checkbox" id="cbborder" onchange="borderChange(event)" checked> <label>Borders</label><br>
+
+        </label></input>
+      </div>
+    </a>
+
+    <div style="margin-left: 15px;">
+      <text class="">Selected year </text>
+
+      <select id="selectNumber" onchange="loadDifferentData(event)">
+        <!-- <option value="" disabled selected>Select your option</option> -->
+      </select>
+    </div>
+
+    <!-- Different Views options -->
+    <a class="w3-bar-item">Views</a>
+
+    <!-- Continental View checkbox -->
+    <a href="#" class="w3-bar-item w3-button item">
+      <div> <input type="checkbox" id="allixpsandasns" onclick="continentalView()" checked>
+        <label>Continental View
+        </label><br>
+
+        </label></input>
+      </div>
+
+    </a>
+    <!-- <div class="w3-dropdown-hover">
+      <button class="w3-button dropDownLevels">Select ASN Level <i class="fa fa-caret-down"></i><span id="levelhtml">
+          Level 1 </span></button>
+      <div class="w3-dropdown-content w3-bar-block">
+        <a href="#" class="w3-bar-item w3-button level" id="1" onclick="levelClick(event)">Level 1</a>
+        <a href="#" class="w3-bar-item w3-button level" id="2" onclick="levelClick(event)">Level 2</a>
+        <a href="#" class="w3-bar-item w3-button level" id="3" onclick="levelClick(event)">Level 3</a>
+        <a href="#" class="w3-bar-item w3-button level" id="4" onclick="levelClick(event)">Level 4</a>
+        <a href="#" class="w3-bar-item w3-button level" id="5" onclick="levelClick(event)">Level 5</a>
+        <a href="#" class="w3-bar-item w3-button level" id="6" onclick="levelClick(event)">Level 6</a>
+
+
+
+      </div>
+    </div> -->
+    <div id="radiobuttons">
+      <a class="w3-bar-item">Show Top:</a>
+
+      <div class="spinner">
+        <p style="margin-top: 0px;"> &nbsp;
+          <input class="w3-radio" id="radio-1" type="radio" value="25%" name="cones" onclick="conesLevel(1)" checked>
+          <label>25%</label></p>
+        <p style="margin-top: 0px;">
+          <input class="w3-radio" id="radio-2" type="radio" value="50%" name="cones" onclick="conesLevel(2)">
+          <label>50%</label></p>
+        <p style="margin-top: 0px;">
+          <input class="w3-radio" id="radio-3" type="radio" value="75%" name="cones" onclick="conesLevel(3)">
+          <label>75%</label></p>
+        <p style="margin-top: 0px;">
+          <input class="w3-radio" id="radio-4" type="radio" value="100%" name="cones" onclick="conesLevel(4)">
+          <label>100% </label>&nbsp;</p>
+      </div>
+    </div>
+    <div id="ixplevelcontrol" style="display: none;">
+      <a class="w3-bar-item">Choose ASN Level</a>
+
+
+
+
+
+
+      <div class="spinner" style="background-color: rgba(240, 240, 240, 0.8);color: black;">
+        <button style="background-color: grey;color: white;" id="decrease" onclick="decreaseLevel()" disabled><i
+            class="fas fa-minus"></i></button>
+        <p id="levelsText">1</p>
+        <button id="increase" style="background-color: black;color: white;" onclick="increaseLevel()"><i
+            class="fas fa-plus"></i></button>
+      </div>
+    </div>
+    <!-- Relationship Views Options -->
+    <a class="w3-bar-item">Relationships</a>
+
+    <!-- Peer to peer cb -->
+    <a href="#" class="w3-bar-item w3-button item">
+      <div> <input type="checkbox" id="p2pcb" onclick="peerToPeer()" checked> <label>Peer to Peer
+        </label><br>
+
+        </label></input>
+      </div>
+
+    </a>
+    <!-- customer to provider relationship -->
+    <a href="#" class="w3-bar-item w3-button item">
+      <div> <input type="checkbox" id="c2pcb" onclick="customerToProvider()" checked> <label>Customer to
+          provider
+        </label><br>
+
+        </label></input>
+      </div>
+
+    </a>
+    <!-- sibling to sibling relationship -->
+
+    <a href="#" class="w3-bar-item w3-button item">
+      <div> <input type="checkbox" id="s2scb" onclick="siblingToSibling()" checked> <label>Sibling to Sibling
+        </label><br>
+
+        </label></input>
+      </div>
+
+    </a>
+
+
+    <div class="w3-panel w3-leftbar w3-rightbar" style="background-color: rgba(240, 240, 240, 0.8); color: black;">
+      <p id="cCodeHTML">Hover over an ASN, IXP or country to see details</p>
+      <p id="noOfIXPsHTML"></p>
+      <p id="noOfASNsHTML"></p>
+      <p id="ixpIdHTML"></p>
+      <p id="ixpNameHTML"></p>
+      <p id="ixpCountryHTML"></p>
+      <p id="ixpCustomersHTML"></p>
+      <p id="asnIdHTML"></p>
+      <p id="asnCountryHTML"></p>
+      <p id="asnCustomersHTML"></p>
+    </div>
+    <!-- <div class="w3-panel w3-pale-yellow w3-leftbar w3-rightbar w3-border-yellow">
+      <p id="ixpIdHTML">IXP ID : </p>
+      <p id="ixpNameHTML">IXP Name : </p>
+      <p id="ixpCountryHTML">Country: </p>
+      <p id="ixpCustomersHTML">Direct Customers: </p>
+    </div>
+    <div class="w3-panel w3-pale-green w3-leftbar w3-rightbar w3-border-green w3-border">
+      <p id="asnIdHTML">ASNS ID : </p>
+      <p id="asnCountryHTML">Country : </p>
+      <p id="asnCustomersHTML">Connections: </p>
+    </div> -->
+
+
+
+
+
+
+
+
+    <!-- Header and Menu button -->
+
+  </div>
+  <div id="headerheading" style="background-color: black; width:100%;">
+    <button id="openNav" class="w3-button w3-xlarge w3-hover-black w3-bar-item"
+      style="background-color: black; color: white;" onclick="w3_open()">&#9776; <h2 style=" display: inline-block;">
+        Africa Internet Visualizer</h1>
+    </button>
+
+  </div>
+  <div id="main">
+    <span>
+      <button id="zoom-in"><i class="fas fa-search-plus"></i></button>
+      <button id="zoom-out"><i class="fas fa-search-minus"></i></button>
+      <button id="centre"><i class="fas fa-redo-alt"></i></button>
+    </span>
+    <div class="loader-wrapper">
+      <span class="loader"><span class="loader-inner"></span></span>
+    </div>
+
+
+    <script src="./src/navigation.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://kit.fontawesome.com/a68d1a8f9d.js" crossorigin="anonymous"></script>
+
+    <!--D3 work starts here-->
+    <script src="./src/map.js"></script>
+
+  </div>

@@ -56,7 +56,7 @@ def reloadLocations(year):
     print("Locations fetched and total ASN count completed")
     return AfricanAses,AfricaTotals
 
-def getIXPs(AfricanAses):
+def getIXPForASN(AfricanAses):
     #MUST DO
     print("Fetching IXPs")
     dictAs = copy.deepcopy(AfricanAses)
@@ -84,7 +84,7 @@ def reloadRelationships(year):
     print("Relationships between ASes created")
     return AfricanAses
 
-def writeASNS(year,AfricanAses):
+def writeASNS(year,AfricanAses,AfricaTotals):
     WriterCounter = {'Africa':0,'DZA': 0, 'AGO': 0, 'SHN': 0, 'BEN': 0, 'BWA': 0, 'BFA': 0, 'BDI': 0, 'CMR': 0, 'CPV': 0, 'CAF': 0, 'TCD': 0, 'COM': 0, 'COG': 0, 'COD': 0, 'DJI': 0, 'EGY': 0, 'GNQ': 0, 'ERI': 0, 'SWZ': 0, 'ETH': 0, 'GAB': 0, 'GMB': 0, 'GHA': 0, 'GIN': 0, 'GNB': 0, 'CIV': 0, 'KEN': 0, 'LSO': 0, 'LBR': 0, 'LBY': 0, 'MDG': 0, 'MWI': 0, 'MLI': 0, 'MRT': 0, 'MUS': 0, 'MYT': 0, 'MAR': 0, 'MOZ': 0, 'NAM': 0, 'NER': 0, 'NGA': 0, 'STP': 0, 'REU': 0, 'RWA': 0, 'SEN': 0, 'SYC': 0, 'SLE': 0, 'SOM': 0, 'ZAF': 0, 'SSD': 0, 'SDN': 0, 'TZA': 0, 'TGO': 0, 'TUN': 0, 'UGA': 0, 'ZMB': 0, 'ZWE': 0}
     f = open("./backend/ASNS/"+str(year)+".json","w")
     f.write("[")
@@ -154,13 +154,49 @@ def writeIXPS(year,AfricanIXPs):
 
 def prepData(yeartoprocess):
     ASDict = extractASFromCone(yeartoprocess)
+    print("1")
     ASDict,AfricaTotals= getAfricaLocationsAfterExtraction(yeartoprocess,ASDict)
-    IXPDict =getIXPs(ASDict)
+    print("2")
+    IXPDict =getIXPForASN(ASDict)
     ASDict=makeRelationshipsForYear(yeartoprocess,ASDict)
-    writeASNS(yeartoprocess,ASDict)
+    print("3")
+    writeASNS(yeartoprocess,ASDict,AfricaTotals)
+    writeIXPS(yeartoprocess,IXPDict)
+
+def errorOne(yeartoprocess):
+    ASDict = reloadextraction(yeartoprocess)
+    print("1")
+    ASDict,AfricaTotals= getAfricaLocationsAfterExtraction(yeartoprocess,ASDict)
+    print("2")
+    IXPDict =getIXPForASN(ASDict)
+    ASDict=makeRelationshipsForYear(yeartoprocess,ASDict)
+    print("3")
+    writeASNS(yeartoprocess,ASDict,AfricaTotals)
     writeIXPS(yeartoprocess,IXPDict)
 
 
+def errorTwo(yeartoprocess):
+    ASDict = reloadextraction(yeartoprocess)
+    print("1")
+    ASDict,AfricaTotals= reloadLocations(yeartoprocess)
+    print("2")
+    IXPDict =getIXPForASN(ASDict)
+    ASDict=makeRelationshipsForYear(yeartoprocess,ASDict)
+    print("3")
+    writeASNS(yeartoprocess,ASDict,AfricaTotals)
+    writeIXPS(yeartoprocess,IXPDict)
+    
+def errorThree(yeartoprocess):
+    ASDict = reloadextraction(yeartoprocess)
+    print("1")
+    ASDict,AfricaTotals= reloadLocations(yeartoprocess)
+    print("2")
+    IXPDict =getIXPForASN(ASDict)
+    ASDict=reloadRelationships(yeartoprocess)
+    print("3")
+    writeASNS(yeartoprocess,ASDict,AfricaTotals)
+    writeIXPS(yeartoprocess,IXPDict)
+    
 if __name__=="__main__":
     #PIP3 INSTALL THE FOLLOWING:
     #flask, flask_cors
@@ -168,10 +204,15 @@ if __name__=="__main__":
     #country-converter
     #geoip2
     #Shapely
-    for year in range(1998,2021):
-        try:
-            prepData(year)
-            print("Finished",year)
-        except:
-            print("Please redo data processing for",year)
-            continue
+    #for year in range(1998,1999):
+    try:
+        prepData(1111)
+        print("YASSSSS QUEEEEEEN")
+        print("Finished",1111)
+        print("YASSSSS QUEEEEEEN")
+    except Exception as e:
+        print(e)
+        print("ERROR ERROR ERROR ERROR")
+        print("Please redo data processing for",1111)
+        print("ERROR ERROR ERROR ERROR")
+        #continue

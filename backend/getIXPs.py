@@ -101,7 +101,7 @@ def randompt(x0, y0,country):
     inCountry = ((country=="MUS") or (country=="SYC"))
     
 
-    r = 50/111.3
+    r = 200/111.3
     newX=x0
     newY=y0
     attempts=0
