@@ -21,7 +21,7 @@ class Watcher:
                 time.sleep(5)
         except:
             self.observer.stop()
-            print ("Error")
+            print ("Exiting...")
 
         self.observer.join()
 

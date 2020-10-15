@@ -1,6 +1,16 @@
 import aiohttp
 import asyncio
 
+'''
+makeRelationships(ASNDictionary, relationshipFile) takes in the AfricanAS dictionary, and the path to the relationship file, creates relationships and returns a dictionary of ASNs with their relationships
+
+Relationships are created as follows: for each relationship in the file, if both ASNs are in the ASN dictionary the relationship will be created. If the relationship code in the file is 0, they have a p2p relationship, if it is -1, they have a c2p relationship however if they both belong to the same organisation, irrespective of the code in the file, they have an s2s relationship.
+The returned dictionary of ASes is in its completed state as follows:
+
+{*'ASN_ID':{'organisation': <organisation>, 'cone':<size of cone>, 'locations':{*'Country Code':{'latitude':<latitude>, 'longitude':<longitude>,'accuracy':<accuracy radius>}},'relationships':[*<ASN_ID:p2p/c2p/s2s>]}}
+'''
+
+
 def makeRelationships(ASNDictionary,relationshipFile):
     for asn in ASNDictionary.keys():
         ASNDictionary[asn]["relationships"]=[]

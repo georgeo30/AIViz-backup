@@ -84,6 +84,9 @@ def reloadRelationships(year):
     print("Relationships between ASes created")
     return AfricanAses
 
+'''WriteASNS takes in the year processed, a dictionary of ASNs processed, and the tallys of ASNs in African countries, and writes ASNs to a json file.
+It is worth noting that since the ASNs are sorted from largest to smallest cone, as they are written to the file, their quartile level in Africa is determined by dividing incrementing the count of the number of African ASes processed. This number is then divided by the African total, returning a figure between 0 and 1. If it is <0.25 it is in the top 25% and has level 1, else if it is <0.5 it is in the top 50% and has level 2, else if it is <0.75 it is in the top 75% and has level 3, else it has level 4. This is done similarly for each country to divide the ASNs in the country into 4 quartiles arranged by cone size'''
+
 def writeASNS(year,AfricanAses,AfricaTotals):
     WriterCounter = {'Africa':0,'DZA': 0, 'AGO': 0, 'SHN': 0, 'BEN': 0, 'BWA': 0, 'BFA': 0, 'BDI': 0, 'CMR': 0, 'CPV': 0, 'CAF': 0, 'TCD': 0, 'COM': 0, 'COG': 0, 'COD': 0, 'DJI': 0, 'EGY': 0, 'GNQ': 0, 'ERI': 0, 'SWZ': 0, 'ETH': 0, 'GAB': 0, 'GMB': 0, 'GHA': 0, 'GIN': 0, 'GNB': 0, 'CIV': 0, 'KEN': 0, 'LSO': 0, 'LBR': 0, 'LBY': 0, 'MDG': 0, 'MWI': 0, 'MLI': 0, 'MRT': 0, 'MUS': 0, 'MYT': 0, 'MAR': 0, 'MOZ': 0, 'NAM': 0, 'NER': 0, 'NGA': 0, 'STP': 0, 'REU': 0, 'RWA': 0, 'SEN': 0, 'SYC': 0, 'SLE': 0, 'SOM': 0, 'ZAF': 0, 'SSD': 0, 'SDN': 0, 'TZA': 0, 'TGO': 0, 'TUN': 0, 'UGA': 0, 'ZMB': 0, 'ZWE': 0}
     f = open("./backend/ASNS/"+str(year)+".json","w")

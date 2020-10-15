@@ -15,6 +15,14 @@ js = json.load(featurefile)
 def inAfrica(code):
     return (code.upper() in Africa)
 
+'''
+ASYNC FUNCTIONS:
+getPrefixes(AS,session) takes in session object (used for making http requests) and an ASN id and performs a request for the prefixes that an Autonomous System covers and returns it as well as the AS used to make the request using python's async/await mechanism for asynchronous programming
+
+run(r)
+Given a list(analogous to an array in Java etc) of ASN IDs, run compiles a list of requests being awaited, each wrapped in a "future" object (created by asyncio), and these "futures" are "gathered" and returned upon all requests being completed.
+'''
+
 async def getPrefixes(AS, session): 
     #lol
     try:
@@ -34,6 +42,24 @@ async def run(r):
 
         responses = await asyncio.gather(*tasks)
     return responses
+
+'''
+getLocations(ASNDictionary) takes in a dictionary of AS objects and creates geolocation data for each AS object that covers a prefix operating in Africa. It returns an dictionary of ASNs operating in Africa with geolocation data and a dictionary of the number of ASNs operating in each country and the total of ASNs operating in Africa.
+
+It is important to note two pieces of information:
+1. Autonomous Systems can operate in numerous countries hence for each country that an AS exists in, a geolocation in that country must be recorded since data filtering is done by country as well, and it would be inaccurate to leave out an autonomous system from the country in which it operates in as well.
+2. If an autonomous system has multiple prefixes in one country, it still is just one AS, so the prefix with the most accurate geolocation is used as the location for the AS within the country.
+
+First the IDs are extracted from the dictionary of ASNs. In batches of 1000, asynchronous requests are made for ASN to return a list of prefixes that the ASN covers. Once the results are returned, for each ASN, a map of locations are created, with they key being the country and the values consisting of latitude-longitude details and a location accuracy radius.
+For each prefix that the AS covers, the prefix is mapped to their location using MaxMind's geoip2lite database. If the location is in Africa, the African country for the prefix is recorded in a map of locations. If the country has been recorded before, the prefix's geolocation data will replace the existing one in the country if the accuracy radius is smaller (ie the geolocation returned is more accurate).
+Once all prefixes for an AS are processed, if no locations have been stored, then it doesn't operate in Africa and is removed from the dictionary. To resolve collisions, using the accuracy radius ,r, as a guide, a random location within atleast 50km of the the geolocation point to preserve the integrity of the data, whilst avoiding as many overlaps as possible. 50km was chosen as accuracy radii <50km cannot visibly resolve collisions at a country level of zoom. 
+Note that as locations for prefixes in African countries are processed, the total number of ASNs in Africa and in each country are updated.
+The dictionary of ASes are returned and is in the following state:
+{*'ASN_ID':{'organisation': <organisation>, 'cone':<size of cone>, 'locations':{*'Country Code':{'latitude':<latitude>, 'longitude':<longitude>,'accuracy':<accuracy radius>}}}}
+The count of ASes in Africa are returned in a dictionary as follows:
+{'Africa':<total ASNs in Africa>, *'Country Code':<total ASNs operating in the country>}
+These totals will be used to organise the ASNs into categories according to their cone size. This will be specified later. 
+'''
 
 def getLocations(ASNDictionary):
     AfricaCounter = {'Africa':0,'DZA': 0, 'AGO': 0, 'SHN': 0, 'BEN': 0, 'BWA': 0, 'BFA': 0, 'BDI': 0, 'CMR': 0, 'CPV': 0, 'CAF': 0, 'TCD': 0, 'COM': 0, 'COG': 0, 'COD': 0, 'DJI': 0, 'EGY': 0, 'GNQ': 0, 'ERI': 0, 'SWZ': 0, 'ETH': 0, 'GAB': 0, 'GMB': 0, 'GHA': 0, 'GIN': 0, 'GNB': 0, 'CIV': 0, 'KEN': 0, 'LSO': 0, 'LBR': 0, 'LBY': 0, 'MDG': 0, 'MWI': 0, 'MLI': 0, 'MRT': 0, 'MUS': 0, 'MYT': 0, 'MAR': 0, 'MOZ': 0, 'NAM': 0, 'NER': 0, 'NGA': 0, 'STP': 0, 'REU': 0, 'RWA': 0, 'SEN': 0, 'SYC': 0, 'SLE': 0, 'SOM': 0, 'ZAF': 0, 'SSD': 0, 'SDN': 0, 'TZA': 0, 'TGO': 0, 'TUN': 0, 'UGA': 0, 'ZMB': 0, 'ZWE': 0}

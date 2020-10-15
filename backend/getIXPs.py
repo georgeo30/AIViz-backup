@@ -12,6 +12,15 @@ cc = coco.CountryConverter()
 featurefile = open('./backend/customgeo.json','r')
 js = json.load(featurefile)
 featurefile.close()
+
+'''
+ASYNC FUNCTIONS:
+getASNsperIXP(IXP,session) takes in session object (used for making http requests) and an IXP id and performs a request for the AS customers that is in the IXP's subnet and returns it as well as the IXP used to make the request using python's async/await mechanism for asynchronous programming
+
+run(r)
+Given a list(analogous to an array in Java etc) of IXP IDs, run compiles a list of requests being awaited, each wrapped in a "future" object (created by asyncio), and these "futures" are "gathered" and returned upon all requests being completed.
+'''
+
 async def getASNsperIXP(IXP, session):
     async with session.get("https://www.pch.net/api/ixp/subnet_details/"+IXP) as response:
             return [(await response.json()),IXP]
@@ -26,6 +35,13 @@ async def run(r):
         responses = await asyncio.gather(*tasks)
     return responses
 
+'''
+prepareIXPs(AfricanASes) takes in a copy of the ASes that exist in Africa at that date in time(as processed before) and returns a collection of IXP objects with AS customers that exist at the time
+
+A request is made for all active IXPs and for each IXP in Africa, it's location is stored. Afterwards, in batches of 100, IXP subnet details are gathered and for each ASN connected to the IXP, if the ASN is in the set of AfricanASes, it is contained in the IXP object's list of customers.
+At the end, the IXPs are returned and its state is as follows:
+{*'IXP ID':{'name':<name>,'latitude':<latitude>,'longitude':<longitude>,'country':<country code>,'customers':[*<ASN ID>]}}
+'''
 
 def prepareIXPs(AfricanASes):
     response=requests.get("https://www.pch.net/api/ixp/directory/Active")

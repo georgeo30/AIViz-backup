@@ -8,7 +8,13 @@ Africa=["DZ","AO","SH","BJ","BW","BF","BI","CM","CV","CF","TD","KM","CG","CD","D
 
 def inAfrica(code):
     return (code.upper() in Africa)
+'''
+ASYNC FUNCTIONS:
+getASNOrg(AS,session) takes in session object (used for making http requests) and an ASN id and performs a whois request and returns it as well as the AS used to make the request using python's async/await mechanism for asynchronous programming
 
+run(r)
+Given a list(analogous to an array in Java etc) of ASN IDs, run compiles a list of requests being awaited, each wrapped in a "future" object (created by asyncio), and these "futures" are "gathered" and returned upon all requests being completed.
+'''
 async def getASNOrg(AS, session):
     async with session.get("https://stat.ripe.net/data/whois/data.json?resource="+AS) as response2:
         return [await response2.json(),AS]
@@ -23,6 +29,10 @@ async def run(r):
 
         responses = await asyncio.gather(*tasks)
     return responses
+
+'''
+getAllASNs(filename) takes in the file name of the ppdc file and reads the AS ids in it, and stores the size of the cone of the Autonomous System. Thereafter, in batches of 1000, it performs the whois requests using the asynchoronous mechanisms implemented by asyncio and aiohttp to perform http requests. For each batch, it extracts the Organisation for each AS and stores it in the dictionary of ASes. Once all batches are complete, it returns this dictionary. Following this method, the current state of the AS dictionary is {'ASN_ID':{'organisation': <organisation>, 'cone':<size of cone>}} and is sorted by cone size (as this is how the ppdc file is arranged)
+'''
 
 def getAllASNs(filename):
     
