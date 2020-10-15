@@ -45,7 +45,9 @@ def prepareIXPs(AfricanASes):
             IXPSubset= AfricanIXPList[(100*(i)):(100*(i+1))]
         else:
             IXPSubset= AfricanIXPList[((max-1)*100):]
-        loop = asyncio.get_event_loop()
+        # loop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         future = asyncio.ensure_future(run(IXPSubset))
         loop.run_until_complete(future)
         results = future.result()

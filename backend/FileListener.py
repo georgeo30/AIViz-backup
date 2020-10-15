@@ -3,6 +3,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import subprocess
 import dataPrep as dataPrep
+import shutil
 
 
 class Watcher:
@@ -27,13 +28,29 @@ class Watcher:
 
 class Handler(FileSystemEventHandler):
 
+    # @staticmethod
+    # def on_any_event(event):
+    #     if (not (event.is_directory)):
+    #         return None
+    #     elif event.event_type == 'created':
+    #         newfile= ((str(event.src_path).split("/"))[-1])
+    #         subprocess.run(['mv',('./backend/UnprocessedFiles/'+newfile), './backend/files'])
+    #         dataPrep.prepData(newfile)
     @staticmethod
     def on_any_event(event):
         if (not (event.is_directory)):
             return None
         elif event.event_type == 'created':
-            newfile= ((str(event.src_path).split("/"))[-1])
-            subprocess.run(['mv',('./backend/UnprocessedFiles/'+newfile), './backend/files'])
+            #newfile=newfile.replace('\\','/')
+            #newfile= ((str(event.src_path).split("/"))[-1])
+            newfile=(str(event.src_path)).replace('\\','/')
+            newfile= ((newfile.split("/"))[-1])
+            print(newfile)
+            source='./backend/UnprocessedFiles/'+newfile
+            destination='./backend/files'
+            shutil.move(source,destination)
+            print("hello")
+            #subprocess.run(['mv',('./backend/'+newfile), './backend/files'])
             dataPrep.prepData(newfile)
 
 

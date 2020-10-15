@@ -31,7 +31,6 @@ def makeRelationships(ASNDictionary,relationshipFile):
                     if (sameorg):
                         ASNDictionary[as2]["relationships"].append(str("ASN_"+as1+"_"+location1+":s2s"))
                     elif (str(details[2]).strip("\n")=="0"):
-                        print("suckyomom")
                         ASNDictionary[as2]["relationships"].append(str("ASN_"+as1+"_"+location1+":p2p"))
                     else:
                         ASNDictionary[as2]["relationships"].append(str("ASN_"+as1+"_"+location1+":c2p"))

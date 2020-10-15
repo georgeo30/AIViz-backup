@@ -44,7 +44,9 @@ def getAllASNs(filename):
         else:
             ASNSubset= AllASes[((max-1)*1000):]
         print("Percentage complete: ",100*i/max)
-        loop = asyncio.get_event_loop()
+        # loop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         future = asyncio.ensure_future(run(ASNSubset))
         loop.run_until_complete(future)
         results = future.result()

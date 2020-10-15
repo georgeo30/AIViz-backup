@@ -48,9 +48,11 @@ def getLocations(ASNDictionary):
         else:
             ASNSubset= AllASes[((max-1)*1000):]
         print("Percentage complete: ",100*i/max)
-        loop1 = asyncio.get_event_loop()
+        # loop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         future = asyncio.ensure_future(run(ASNSubset))
-        loop1.run_until_complete(future)
+        loop.run_until_complete(future)
         client= geoip2.database.Reader("./backend/GeoLite2-City.mmdb")
         results = future.result()
         for arr in results:
