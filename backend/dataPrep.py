@@ -11,7 +11,7 @@ AfricaTotals={}
 def extractASFromCone(year):
     # MUST DO
     print("Fetching ASNs, organisations and cone size")
-    AfricanAses = extractAllASNs.getAllASNs("./backend/files/"+str(year)+"/"+str(year)+"0701.ppdc-ases.txt")
+    AfricanAses = extractAllASNs.getAllASNs("./backend/files/"+str(year)+"/"+str(year)+".ppdc-ases.txt")
     print("ASNs, organisations and cone size fetched")
     #The Following is optional: save progress
     temp = open("./backend/files/"+str(year)+"/ASNORGCONE.json","w")
@@ -67,7 +67,7 @@ def getIXPForASN(AfricanAses):
 def makeRelationshipsForYear(year, AfricanAses):
     #MUST DO
     print("Creating relationships")
-    AfricanAses = Relationships.makeRelationships(AfricanAses,"./backend/files/"+str(year)+"/"+str(year)+"0701.as-rel.txt")
+    AfricanAses = Relationships.makeRelationships(AfricanAses,"./backend/files/"+str(year)+"/"+str(year)+".as-rel.txt")
     print("Relationships between ASes created")
     newtemp =open("./backend/files/"+str(year)+"/RELATIONSHIPS.json","w")
     newtemp.write(json.dumps(AfricanAses))

@@ -4,6 +4,7 @@ from watchdog.events import FileSystemEventHandler
 import subprocess
 import dataPrep as dataPrep
 import shutil
+import json
 
 
 class Watcher:
@@ -45,11 +46,18 @@ class Handler(FileSystemEventHandler):
             #newfile= ((str(event.src_path).split("/"))[-1])
             newfile=(str(event.src_path)).replace('\\','/')
             newfile= ((newfile.split("/"))[-1])
-            print(newfile)
             source='./backend/UnprocessedFiles/'+newfile
             destination='./backend/files'
             shutil.move(source,destination)
-            print("hello")
+            f= open("./backend/datelist.json","r")
+            obj = json.load(f)
+            f.close()
+            if newfile not in obj["dates"]:
+                obj["dates"].append(newfile)
+            obj["dates"]=sorted(obj["dates"],reverse=True)
+            f= open("./backend/datelist.json","w")
+            f.write(json.dumps(obj))
+            f.close()
             #subprocess.run(['mv',('./backend/'+newfile), './backend/files'])
             dataPrep.prepData(newfile)
 
