@@ -199,6 +199,7 @@ function InitialState() {
   document.getElementById("s2scb").checked = true;
   document.getElementById("p2pcb").checked = true;
   document.getElementById("radio-1").checked = true;
+  document.getElementById("radiobuttons").style.display = "initial";
   document.getElementById("allixpsandasns").checked = true;
   document.getElementById("cbborder").checked = true;
   //Resetting zoom level
