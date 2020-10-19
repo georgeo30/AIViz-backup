@@ -17,7 +17,7 @@ const zoom = d3.zoom().scaleExtent(ZOOM_THRESHOLD).on("zoom", zoomed);
 //Canvas settings (Centers projection)
 var x = width / 2, y = height / 2;
 var centered;
-  
+
 
 //Projection type
 var projection = d3
@@ -40,7 +40,7 @@ var svg = d3
   .attr("height", height)
 
 ;
-//Tag canvas with the zoom object 
+//Tag canvas with the zoom object
 var g = svg.call(zoom).append("g");
 //Add empty rectangle within the canvas for smoother zoom experience (d3 conventions)
 g.append("rect")
@@ -51,7 +51,7 @@ g.append("rect")
     `translate(-${width * OVERLAY_OFFSET},-${height * OVERLAY_OFFSET})`
   )
   .style("fill", "none")
-  .style("pointer-events", "all")  
+  .style("pointer-events", "all")
   .on("mouseover", hoverleave)
   ;
 
@@ -89,7 +89,7 @@ var ixpsbyid;
 //IXP id is mapped to the level it corresponds to (1st level asn: Direct customer of an IXP, 2nd level asn:  asn that has a relationship with a  1st level asn but not with the IXP directly ... )
 var asnViewMap;
 
-//Ixp levels are mapped to an array of asns that fall within each category (1st level asns would be accessed using "levelsMap[1]" and so forth) 
+//Ixp levels are mapped to an array of asns that fall within each category (1st level asns would be accessed using "levelsMap[1]" and so forth)
 var levelsMap;
 
 //ASN id is mapped to it's corresponding data
@@ -143,10 +143,10 @@ function loadLatestList()
     latest = dateList["dates"][0];
     d3.queue()
       .defer(d3.json, "../data/africaTopo.json")
-      
+
       .defer(d3.json, "http://127.0.0.1:5000/ixp/" + latest + ".json")
 
-      
+
       .defer(d3.json, "http://127.0.0.1:5000/asn/" + latest + ".json")
 
       .await(ready);
@@ -164,7 +164,7 @@ function loadDifferentData(dateChangeEvent) {
   //Display loading screen
   document.getElementById("main").appendChild(loaderDiv);
   //Api calls
-  
+
   d3.queue()
     .defer(
       d3.json,
@@ -181,6 +181,7 @@ function loadDifferentData(dateChangeEvent) {
  */
 function InitialState() {
   //Resetting variables
+
   currentView = "continental";
   borderCheck(true);
   previousCountry = null;
@@ -243,10 +244,10 @@ function ready(error, africa, ixps, asns) {
 
   //Draw all ASNS
   drawASNS(asns);
-  
+
   //Remove loading screen when everything has loaded
   d3.select(".loader-wrapper").remove();
-  
+
   //Generates the UI dropdown for files of different years to be loaded upon a users request
   datesDropdown();
 }
@@ -274,7 +275,10 @@ function addCountryElements(features){
  * @param  {Array} asns - List of asns
  */
 function readyChangeDate(error, ixps, asns) {
-  d3.selectAll(".country").selectAll("*").remove();
+  d3.selectAll(".country").each(function(){
+    d3.select(this).style("visibility","visible");
+    d3.select(this).selectAll("*").remove();
+  });
   //Add and parse attributes for the list of ixps and asns
   ixps = typeIxp(ixps);
   asns = typeAsn(asns);
@@ -296,13 +300,13 @@ function readyChangeDate(error, ixps, asns) {
 
   //Reset the view to continental
   currentView = "continental";
-  
+
   //Reset the dom element states
   document.getElementById("allixpsandasns").checked;
   document.getElementById("ixplevelcontrol").style.display = "none";
   d3.select(".loader-wrapper").remove();
-  
-} 
+
+}
 /**
  * Draws the country borders and fill within the canvas using geojson input
  * @param  {Array} features - GeoJson features for all african countries
@@ -406,7 +410,7 @@ function drawASNS(asns) {
 
 
             let destinationAsn = asnsbyid.get(destinationKey);
-            
+
             currentContainer
               .select(`g.${relationshipType}`)
               .append("line")
@@ -455,7 +459,7 @@ function drawASNS(asns) {
             .attr("cy", function (d) {
               return projection([sourceAsn.longitude, sourceAsn.latitude])[1];
             })
-            
+
             .style("visibility", "inherit")
             .style("fill", continentalFill)
             .style("stroke", continentalFill)
@@ -517,7 +521,7 @@ function borderCheck(showFlag) {
  * Resets the previous's views components and delegates/triggers the drawing component of the continental view
  */
 function continentalView() {
-  
+
   document.getElementById("ixplevelcontrol").style.display = "none";
   document.getElementById("radiobuttons").style.display = "initial";
 
@@ -595,9 +599,9 @@ function setType(relationshipType, visible) {
       .each(function (d) {
         d3.select(this).style("visibility", visibilityStatus);
       });
-    
+
   } else if (currentView.toLowerCase() == "national") {
-    
+
     g.select(`#${previousCountry}.country`)
       .selectAll(".ASN")
       .selectAll(`g.${relationshipType}`)
@@ -643,7 +647,7 @@ function clickIxp(d) {
   document.getElementById("radiobuttons").style.display = "none";
   document.getElementById("ixplevelcontrol").style.display = "initial";
   document.getElementById("allixpsandasns").checked = false;
-  
+
   if (currentView == "national") {
     revertToCountryInherit();
     resetLevelComponent();
@@ -655,7 +659,7 @@ function clickIxp(d) {
 
     currentView = "IXP";
     showIxp(clickedIxp);
-  } 
+  }
   else if (currentView == "continental") {
     let clickedIxp = d;
     previousIXP = d;
@@ -683,7 +687,7 @@ function levelOne(d) {
     countryAsns.push(asnsbyid.get(id).country);
     asnViewMap.set(id, "1");
   });
-  
+
   countryAsns = [...new Set(countryAsns)];
 
   let ixpC2pStatus = c2pStatus() ? "inherit" : "hidden";
@@ -732,8 +736,8 @@ function levelOne(d) {
         }
       });
   });
-  
-  
+
+
 
   if (!levelsMap.get("1").length) {
     document.getElementById("increase").disabled = true;
@@ -743,7 +747,7 @@ function levelOne(d) {
 
 /**
  * Draws an ixp's nth level customers on the map along with their respective relationships
- * @param  {Number} index - Current level 
+ * @param  {Number} index - Current level
  */
 function levelsN(index) {
   let nextIndex = index + 1;
@@ -769,7 +773,7 @@ function levelsN(index) {
       .selectAll(".ASN")
       .each(function (d, i) {
         if (asnViewMap.get(d.id) == index.toString()) {
-          
+
           d3.select(this).style("visibility", "visible");
 
           d3.select(this).select("g.c2p").style("visibility", ixpC2pStatus);
@@ -1026,7 +1030,7 @@ function zooming() {
 
 
 /**
- * Makes the user selected country element visible and delegates the process of displaying a countries internal relationships, asns and ixps 
+ * Makes the user selected country element visible and delegates the process of displaying a countries internal relationships, asns and ixps
  * @param  {String} country : 3-digit country code for the clicked country
  */
 function countryView(country) {
@@ -1194,7 +1198,7 @@ function drawEverything(showFlag) {
                 }
                 //Destination in same layer requires to check if destination has been processed before
                 else if (destinationAsn.AfricaLevel == currentAsN.AfricaLevel) {
-                  // 
+                  //
                   return destinationAsn.processed ? "hidden" : "inherit";
                 }
                 //Destination in layer above must be drawn
@@ -1238,7 +1242,7 @@ function conesLevel(d) {
 }
 /**
  * Draws or hides asns & relationships based on whether the user increased or decreased the level to be displayed for an ixp view
- * @param  {Number} l - User selected ixp customer level 
+ * @param  {Number} l - User selected ixp customer level
  */
 function levelClick(l) {
   resetProcessed();
@@ -1252,7 +1256,7 @@ function levelClick(l) {
     if (previousLevel < level) {
       for (let i = previousLevel + 1; i <= level; i++) {
         levelsN(i);
-        
+
       }
     } else {
       countryAsns.forEach(function (country) {
@@ -1268,7 +1272,7 @@ function levelClick(l) {
       });
     }
   }
-  
+
 }
 
 /**
@@ -1293,11 +1297,11 @@ function resetZoom() {
  * The type of transformation applied when a zooming event occurs
  */
 function zoomed() {
-  g.attr("transform", d3.event.transform); 
+  g.attr("transform", d3.event.transform);
 }
 /**
  * Ensures that the UI component responsible for reducing and increasing the ixp view levels are disabled or displayed based on the user selected click
- * It delegates the process of showing a subset of asns and relationships to the levelClick function 
+ * It delegates the process of showing a subset of asns and relationships to the levelClick function
  */
 function decreaseLevel() {
   let c = document.getElementById("levelsText").innerHTML;
@@ -1317,7 +1321,7 @@ function decreaseLevel() {
 }
 /**
  * Ensures that the UI component responsible for increasing the ixp view levels are displayed when the user triggers this method
- * It delegates the process of showing a superset of asns and relationships to the levelClick function 
+ * It delegates the process of showing a superset of asns and relationships to the levelClick function
  */
 function increaseLevel() {
   let c = document.getElementById("levelsText").innerHTML;
@@ -1330,7 +1334,7 @@ function increaseLevel() {
   levelClick(c);
 }
 /**
- * Resets the UI level component with which the user normally selects the quartile for asns to displayed 
+ * Resets the UI level component with which the user normally selects the quartile for asns to displayed
  */
 function resetLevelComponent() {
   level = 1;
@@ -1347,7 +1351,7 @@ function resetLevelComponent() {
 
 /**
  * Modifies the property customers property to become an array data structure containing all the customers of an asn
- * @param  {Array} arr - list of ixp elements 
+ * @param  {Array} arr - list of ixp elements
  */
 function typeIxp(arr) {
   for (let index = 0; index < arr.length; index++) {
@@ -1367,7 +1371,7 @@ function typeIxp(arr) {
 }
 
 /**
- * Modifies the ASN elements by adding a processed attribute and by parsing the map attribute values into a map datastructure 
+ * Modifies the ASN elements by adding a processed attribute and by parsing the map attribute values into a map datastructure
  * @param  {Array} arr - list of array elements
  */
 function typeAsn(arr) {
@@ -1395,9 +1399,9 @@ function typeAsn(arr) {
  */
 function datesDropdown() {
   var select = document.getElementById("selectNumber");
-  
+
   let datesDrop = dateList["dates"];
-  
+
   for (let i = 0; i < datesDrop.length; i++) {
     let year = datesDrop[i];
     let el = document.createElement("option");
