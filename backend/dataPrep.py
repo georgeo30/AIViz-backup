@@ -210,9 +210,6 @@ if __name__=="__main__":
     for year in range(1998,2020):
         try:
             errorThree(year)
-            # print("YASSSSS QUEEEEEEN")
-            # print("Finished",1111)
-            # print("YASSSSS QUEEEEEEN")
         except Exception as e:
             print(e)
             print("ERROR ERROR ERROR ERROR")
