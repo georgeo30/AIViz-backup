@@ -207,15 +207,15 @@ if __name__=="__main__":
     #country-converter
     #geoip2
     #Shapely
-    #for year in range(1998,1999):
-    try:
-        prepData(1111)
-        print("YASSSSS QUEEEEEEN")
-        print("Finished",1111)
-        print("YASSSSS QUEEEEEEN")
-    except Exception as e:
-        print(e)
-        print("ERROR ERROR ERROR ERROR")
-        print("Please redo data processing for",1111)
-        print("ERROR ERROR ERROR ERROR")
-        #continue
+    for year in range(1998,2020):
+        try:
+            errorThree(year)
+            # print("YASSSSS QUEEEEEEN")
+            # print("Finished",1111)
+            # print("YASSSSS QUEEEEEEN")
+        except Exception as e:
+            print(e)
+            print("ERROR ERROR ERROR ERROR")
+            print("Please redo data processing for",1111)
+            print("ERROR ERROR ERROR ERROR")
+            #continue
